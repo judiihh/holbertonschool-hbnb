@@ -99,10 +99,10 @@ classDiagram
     +delete_amenity()
   }
 
-  User "1" --> "0..*" Place : owns
-  User "1" --> "0..*" Review : writes
-  Place "1" --> "0..*" Review : has
-  Place "1" --> "0..*" Amenity : contains
+  User --> Place : owns
+  User --> Review : writes
+  Place --> Review : has
+  Place --> Amenity : contains
 ```
 
 ### **🔹 Explanation:**
