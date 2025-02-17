@@ -15,6 +15,7 @@ sequenceDiagram
     BusinessLogic-->>API: Return success message
     API-->>User: Registration successful
 
+---
 
 ## **2️⃣ Place Creation**
 ```mermaid
@@ -31,6 +32,7 @@ sequenceDiagram
     BusinessLogic-->>API: Return place ID
     API-->>User: Place successfully created
 
+---
 
 ## **3️⃣ Review Submission**
 ```mermaid
@@ -47,6 +49,7 @@ sequenceDiagram
     BusinessLogic-->>API: Return review ID
     API-->>User: Review successfully added
 
+---
 
 ## **4️⃣ Fetching a List of Places**
 ```mermaid
