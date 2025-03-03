@@ -1,4 +1,4 @@
-from models.user import User
+from app.models.user import User
 from app.services.repository import InMemoryRepository
 
 class HBnBFacade:
