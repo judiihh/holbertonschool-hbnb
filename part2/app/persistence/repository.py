@@ -19,3 +19,10 @@ class InMemoryRepository:
     def get_all(self):
         """Retrieves all entities in the storage"""
         return list(self.storage.values())  # Fix: Convert dict values to a list
+
+    def get_by_attribute(self, attribute, value):
+        """Retrieves an entity by a specific attribute (e.g., email)"""
+        for entity in self.storage.values():
+            if getattr(entity, attribute, None) == value:
+                return entity
+        return None  # If no entity matches the attribute
