@@ -1,15 +1,22 @@
 class InMemoryRepository:
-    """A simple in-memory repository to store entities"""
+    """A singleton in-memory repository to store entities persistently while the server is running."""
 
-    def __init__(self):
-        self.storage = {}
+    _instance = None  # Singleton instance
+
+    def __new__(cls, *args, **kwargs):
+        if cls._instance is None:
+            cls._instance = super(InMemoryRepository, cls).__new__(cls)
+            cls._instance.storage = {}  # Persistent in-memory storage
+        return cls._instance
 
     def add(self, entity):
         """Adds an entity to the storage"""
+        print(f"DEBUG: Storing entity {entity.id}: {entity.__dict__}")  # Debugging
         self.storage[entity.id] = entity
 
     def get(self, entity_id):
         """Retrieves an entity by its ID"""
+        print(f"DEBUG: Fetching entity with ID {entity_id}")  # Debugging
         return self.storage.get(entity_id)
 
     def update(self, entity):
@@ -18,7 +25,7 @@ class InMemoryRepository:
             self.storage[entity.id] = entity
 
     def get_all(self):
-        """Retrieves all entities in the storage"""
+        """Retrieves all stored entities"""
         return list(self.storage.values())
 
     def get_by_attribute(self, attr, value):
