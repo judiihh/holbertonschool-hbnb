@@ -1,20 +1,26 @@
 class InMemoryRepository:
-    """A simple in-memory repository to store users."""
+    """A simple in-memory repository to store entities"""
 
     def __init__(self):
-        self.data = {}
+        self.storage = {}
 
-    def add(self, obj):
-        """Add an object to the repository."""
-        self.data[obj.id] = obj
+    def add(self, entity):
+        """Adds an entity to the storage"""
+        self.storage[entity.id] = entity
 
-    def get(self, obj_id):
-        """Retrieve an object by its ID."""
-        return self.data.get(obj_id)
+    def get(self, entity_id):
+        """Retrieves an entity by its ID"""
+        return self.storage.get(entity_id)
 
-    def get_by_attribute(self, attr_name, attr_value):
-        """Retrieve an object by an attribute value."""
-        for obj in self.data.values():
-            if getattr(obj, attr_name, None) == attr_value:
-                return obj
-        return None
+    def update(self, entity):
+        """Updates an existing entity in the storage"""
+        if entity.id in self.storage:
+            self.storage[entity.id] = entity
+
+    def get_all(self):
+        """Retrieves all entities in the storage"""
+        return list(self.storage.values())
+
+    def get_by_attribute(self, attr, value):
+        """Retrieve an entity by a specific attribute (e.g., email)"""
+        return next((entity for entity in self.storage.values() if getattr(entity, attr, None) == value), None)
