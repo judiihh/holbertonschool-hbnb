@@ -6,10 +6,14 @@ from app.persistence.repository import InMemoryRepository
 
 class HBnBFacade:
     def __init__(self):
-        # Separate repositories for Users, Amenities, and Places
+        """Initialize repositories for Users, Amenities, and Places"""
         self.user_repo = InMemoryRepository()
         self.amenity_repo = InMemoryRepository()
         self.place_repo = InMemoryRepository()  # Added for Places
+
+        # DEBUG: Preload test users (Temporary fix if users don't persist)
+        test_user = User(id="1fa84864-a4e1-46d2-adf7-d121d18ac200", first_name="Alice", last_name="Smith", email="alice@example.com")
+        self.user_repo.add(test_user)
 
     # ------------- User Management Methods -------------
     def create_user(self, user_data):
@@ -73,11 +77,14 @@ class HBnBFacade:
     def create_place(self, place_data):
         """Creates a new Place and stores it in the repository"""
 
+        # Debugging - Print user_id before checking
+        print(f"DEBUG: Checking user_id: {place_data.get('user_id')}")
+
         # Validate user_id (owner)
         user = self.get_user(place_data['user_id'])  # Explicitly use get_user
         print(f"DEBUG: Retrieved user {place_data['user_id']}: {user}")  # Debug print
 
-        if 'user_id' not in place_data or not user:
+        if not user:
             raise ValueError("Invalid user_id: User does not exist")
 
         # Validate required numeric attributes
@@ -94,6 +101,7 @@ class HBnBFacade:
         place = Place(**place_data)
         self.place_repo.add(place)
         return place
+
 
     def get_place(self, place_id):
         """Retrieves a Place by its ID"""
