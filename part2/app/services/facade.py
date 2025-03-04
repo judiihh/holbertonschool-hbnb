@@ -1,14 +1,16 @@
 from app.models.amenity import Amenity
-from app.models.user import User  # Import User model
-from app.persistence.repository import InMemoryRepository  # Correct import
+from app.models.user import User
+from app.models.place import Place  # Import Place model
+from app.persistence.repository import InMemoryRepository
 
 class HBnBFacade:
     def __init__(self):
-        # Separate repositories for Users and Amenities
+        # Separate repositories for Users, Amenities, and Places
         self.user_repo = InMemoryRepository()
         self.amenity_repo = InMemoryRepository()
+        self.place_repo = InMemoryRepository()  # Added for Places
 
-    # User Management Methods
+    # ------------- User Management Methods -------------
     def create_user(self, user_data):
         """Creates a new User and stores it in the repository"""
         user = User(**user_data)
@@ -25,7 +27,7 @@ class HBnBFacade:
 
     def get_all_users(self):
         """Retrieves all users"""
-        return list(self.user_repo.get_all())  # Convert to list for JSON response
+        return list(self.user_repo.get_all())
 
     def update_user(self, user_id, user_data):
         """Updates an existing User's details"""
@@ -39,7 +41,7 @@ class HBnBFacade:
         self.user_repo.update(user)
         return user
 
-    # Amenity Management Methods (Already Correct)
+    # ------------- Amenity Management Methods -------------
     def create_amenity(self, amenity_data):
         """Creates a new Amenity and stores it in the repository"""
         amenity = Amenity(**amenity_data)
@@ -65,3 +67,43 @@ class HBnBFacade:
 
         self.amenity_repo.update(amenity)
         return amenity
+
+    # ------------- Place Management Methods (NEW) -------------
+    def create_place(self, place_data):
+        """Creates a new Place and stores it in the repository"""
+        place = Place(**place_data)
+
+        # Validate user_id (owner)
+        if not place.user_id:
+            raise ValueError("user_id is required")
+
+        # Validate price, latitude, and longitude
+        if place.price_by_night < 0:
+            raise ValueError("Price must be a positive number")
+        if not (-90 <= place.latitude <= 90):
+            raise ValueError("Latitude must be between -90 and 90")
+        if not (-180 <= place.longitude <= 180):
+            raise ValueError("Longitude must be between -180 and 180")
+
+        self.place_repo.add(place)
+        return place
+
+    def get_place(self, place_id):
+        """Retrieves a Place by its ID"""
+        return self.place_repo.get(place_id)
+
+    def get_all_places(self):
+        """Retrieves all places"""
+        return list(self.place_repo.get_all())
+
+    def update_place(self, place_id, place_data):
+        """Updates an existing Place"""
+        place = self.place_repo.get(place_id)
+        if not place:
+            return None
+
+        for key, value in place_data.items():
+            setattr(place, key, value)
+
+        self.place_repo.update(place)
+        return place
