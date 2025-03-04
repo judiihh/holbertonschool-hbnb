@@ -28,7 +28,7 @@ class PlaceList(Resource):
         place_data = api.payload
         try:
             new_place = facade.create_place(place_data)
-            return new_place.__dict__, 201
+            return new_place, 201 # Return directly
         except ValueError as e:
             return {'error': str(e)}, 400
 
