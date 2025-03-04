@@ -31,6 +31,42 @@ class HBnBFacade:
         """Retrieves all users"""
         return [user.to_dict() for user in self.user_repo.get_all()]
 
+    # ------------- Amenity Management Methods -------------
+    def create_amenity(self, amenity_data):
+        """
+        Creates a new Amenity and stores it in the repository.
+        If you need validations (e.g., name required), add them here.
+        """
+        print(f"DEBUG: Creating amenity with data: {amenity_data}")  # Debugging
+        amenity = Amenity(**amenity_data)
+        self.amenity_repo.add(amenity)
+        print(f"DEBUG: Created amenity: {amenity.to_dict()}")  # Debugging
+        return amenity.to_dict()
+
+    def get_amenity(self, amenity_id):
+        """Retrieves an Amenity by its ID"""
+        print(f"DEBUG: Looking for amenity with ID: {amenity_id}")  # Debugging
+        amenity = self.amenity_repo.get(amenity_id)
+        return amenity.to_dict() if amenity else None
+
+    def get_all_amenities(self):
+        """Retrieves all Amenities"""
+        return [amenity.to_dict() for amenity in self.amenity_repo.get_all()]
+
+    def update_amenity(self, amenity_id, amenity_data):
+        """Updates an existing Amenity"""
+        print(f"DEBUG: Updating amenity with ID: {amenity_id} using data: {amenity_data}")  # Debugging
+        amenity = self.amenity_repo.get(amenity_id)
+        if not amenity:
+            return None
+
+        for key, value in amenity_data.items():
+            setattr(amenity, key, value)
+
+        self.amenity_repo.update(amenity)
+        print(f"DEBUG: Updated amenity: {amenity.to_dict()}")  # Debugging
+        return amenity.to_dict()
+
     # ------------- Place Management Methods -------------
     def create_place(self, place_data):
         """Creates a new Place and stores it in the repository"""
@@ -47,17 +83,18 @@ class HBnBFacade:
         if 'price_by_night' not in place_data or place_data['price_by_night'] < 0:
             raise ValueError("price_by_night is required and must be positive")
 
-        if 'latitude' in place_data and not (-90 <= place_data['latitude'] <= 90):
-            raise ValueError("Latitude must be between -90 and 90")
+        if 'latitude' in place_data:
+            if not (-90 <= place_data['latitude'] <= 90):
+                raise ValueError("Latitude must be between -90 and 90")
 
-        if 'longitude' in place_data and not (-180 <= place_data['longitude'] <= 180):
-            raise ValueError("Longitude must be between -180 and 180")
+        if 'longitude' in place_data:
+            if not (-180 <= place_data['longitude'] <= 180):
+                raise ValueError("Longitude must be between -180 and 180")
 
         # Create and store place
         place = Place(**place_data)
         self.place_repo.add(place)
         print(f"DEBUG: Created place: {place.to_dict()}")  # Debugging
-
         return place.to_dict()
 
     def get_place(self, place_id):
@@ -69,10 +106,37 @@ class HBnBFacade:
         """Retrieves all places"""
         return [place.to_dict() for place in self.place_repo.get_all()]
 
+    def update_place(self, place_id, place_data):
+        """Updates an existing Place"""
+        print(f"DEBUG: Updating place with ID: {place_id} using data: {place_data}")  # Debugging
+        place = self.place_repo.get(place_id)
+        if not place:
+            return None
+
+        # Re-run validations on relevant fields
+        if 'price_by_night' in place_data:
+            if place_data['price_by_night'] < 0:
+                raise ValueError("price_by_night must be positive")
+
+        if 'latitude' in place_data:
+            if not (-90 <= place_data['latitude'] <= 90):
+                raise ValueError("Latitude must be between -90 and 90")
+
+        if 'longitude' in place_data:
+            if not (-180 <= place_data['longitude'] <= 180):
+                raise ValueError("Longitude must be between -180 and 180")
+
+        # Update attributes
+        for key, value in place_data.items():
+            setattr(place, key, value)
+
+        self.place_repo.update(place)
+        print(f"DEBUG: Updated place: {place.to_dict()}")  # Debugging
+        return place.to_dict()
+
     # ------------- Review Management Methods -------------
     def create_review(self, review_data):
         """Creates a new Review and stores it in the repository"""
-
         # Validate user_id
         user = self.get_user(review_data.get("user_id"))
         print(f"DEBUG: Looking for user with ID: {review_data.get('user_id')} -> Found: {user}")  # Debugging
