@@ -1,4 +1,4 @@
-from models.base_model import BaseModel
+from .base_model import BaseModel
 
 class Review(BaseModel):
     """Review model linked to a Place"""

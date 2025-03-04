@@ -1,4 +1,4 @@
-from models.base_model import BaseModel
+from .base_model import BaseModel
 
 class Amenity(BaseModel):
     """Amenity model linked to a Place"""
