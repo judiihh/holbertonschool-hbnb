@@ -22,7 +22,10 @@ class HBnBFacade:
 
     def get_user(self, user_id):
         """Retrieves a User by its ID"""
-        return self.user_repo.get(user_id)
+        print(f"DEBUG: Looking for user with ID: {user_id}")  # Add this
+        user = self.user_repo.get(user_id)
+        print(f"DEBUG: Found user: {user}")  # Add this
+        return user
 
     def get_user_by_email(self, email):
         """Retrieves a user by their email"""
