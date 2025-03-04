@@ -28,7 +28,12 @@ class PlaceList(Resource):
         place_data = api.payload
         try:
             new_place = facade.create_place(place_data)
-            return new_place.to_dict(), 201  # FIX: Use .to_dict() for JSON serialization
+
+            if new_place is None:  # Handle case where place creation failed
+                return {'error': 'Place could not be created. Check user_id or input data.'}, 400
+
+            return new_place.to_dict(), 201  # Return place dictionary
+
         except ValueError as e:
             return {'error': str(e)}, 400
 
@@ -36,7 +41,7 @@ class PlaceList(Resource):
     def get(self):
         """Retrieve all places"""
         places = facade.get_all_places()
-        return [place.to_dict() for place in places], 200  # FIX: Use .to_dict() for JSON serialization
+        return [place.to_dict() for place in places], 200  # Fix: Use .to_dict()
 
 @api.route('/<string:place_id>')
 class PlaceResource(Resource):
@@ -47,7 +52,7 @@ class PlaceResource(Resource):
         place = facade.get_place(place_id)
         if not place:
             return {'error': 'Place not found'}, 404
-        return place.to_dict(), 200  # FIX: Use .to_dict() for JSON serialization
+        return place.to_dict(), 200  # Fix: Use .to_dict()
 
     @api.expect(place_model, validate=True)
     @api.response(200, 'Place successfully updated')
@@ -58,4 +63,4 @@ class PlaceResource(Resource):
         updated_place = facade.update_place(place_id, place_data)
         if not updated_place:
             return {'error': 'Place not found'}, 404
-        return updated_place.to_dict(), 200  # FIX: Use .to_dict() for JSON serialization
+        return updated_place.to_dict(), 200  # Fix: Use .to_dict()
