@@ -1,48 +1,59 @@
 from flask_restx import Namespace, Resource, fields
-from app.services.facade import HBnBFacade
+# from facade.amenities_facade import AmenitiesFacade  # example import
 
-api = Namespace('amenities', description='Amenity operations')
-facade = HBnBFacade()
+api_amenities = Namespace('amenities', description='Amenities endpoints')
 
-# Define the Amenity model for input validation
-amenity_model = api.model('Amenity', {
-    'name': fields.String(required=True, description='Name of the amenity')
+# Define what the JSON payload looks like and what is returned
+amenity_model = api_amenities.model('Amenity', {
+    'id': fields.String(readonly=True, description='Unique ID of the amenity'),
+    'name': fields.String(required=True, description='Amenity name')
 })
 
-@api.route('/')
-class AmenityList(Resource):
-    @api.response(200, 'List of amenities retrieved successfully')
+@api_amenities.route('')
+class AmenitiesList(Resource):
+    @api_amenities.doc('list_amenities')
+    @api_amenities.marshal_list_with(amenity_model)
     def get(self):
-        """Retrieve all amenities"""
-        amenities = facade.get_all_amenities()
-        return [{'id': a.id, 'name': a.name} for a in amenities], 200
+        """
+        Retrieve all amenities
+        """
+        return AmenitiesFacade.get_all_amenities()
 
-    @api.expect(amenity_model, validate=True)
-    @api.response(201, 'Amenity successfully created')
+    @api_amenities.doc('create_amenity')
+    @api_amenities.expect(amenity_model)
+    @api_amenities.marshal_with(amenity_model, code=201)
     def post(self):
-        """Create a new amenity"""
-        amenity_data = api.payload
-        new_amenity = facade.create_amenity(amenity_data)
-        return {'id': new_amenity.id, 'name': new_amenity.name}, 201
+        """
+        Create a new amenity
+        """
+        data = api_amenities.payload
+        new_amenity = AmenitiesFacade.create_amenity(data)
+        return new_amenity, 201
 
-@api.route('/<amenity_id>')
-class AmenityResource(Resource):
-    @api.response(200, 'Amenity details retrieved successfully')
-    @api.response(404, 'Amenity not found')
+
+@api_amenities.route('/<string:amenity_id>')
+class AmenityDetail(Resource):
+    @api_amenities.doc('get_amenity')
+    @api_amenities.marshal_with(amenity_model)
     def get(self, amenity_id):
-        """Get an amenity by its ID"""
-        amenity = facade.get_amenity(amenity_id)
+        """
+        Retrieve a single amenity by its ID
+        """
+        amenity = AmenitiesFacade.get_amenity(amenity_id)
         if not amenity:
-            return {'error': 'Amenity not found'}, 404
-        return {'id': amenity.id, 'name': amenity.name}, 200
+            api_amenities.abort(404, "Amenity not found")
+        return amenity
 
-    @api.expect(amenity_model, validate=True)
-    @api.response(200, 'Amenity updated successfully')
-    @api.response(404, 'Amenity not found')
+    @api_amenities.doc('update_amenity')
+    @api_amenities.expect(amenity_model)
+    @api_amenities.marshal_with(amenity_model)
     def put(self, amenity_id):
-        """Update an amenity"""
-        amenity_data = api.payload
-        updated_amenity = facade.update_amenity(amenity_id, amenity_data)
+        """
+        Update an existing amenity
+        """
+        data = api_amenities.payload
+        updated_amenity = AmenitiesFacade.update_amenity(amenity_id, data)
         if not updated_amenity:
-            return {'error': 'Amenity not found'}, 404
-        return {'id': updated_amenity.id, 'name': updated_amenity.name}, 200
+            api_amenities.abort(404, "Amenity not found or update failed")
+        return updated_amenity
+
