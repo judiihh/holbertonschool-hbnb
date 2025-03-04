@@ -1,21 +1,23 @@
-import uuid
+from uuid import uuid4
 from datetime import datetime
 
 class BaseModel:
     """Base model with common attributes and methods"""
-
     def __init__(self, *args, **kwargs):
-        """Initializes a new instance of BaseModel"""
         if kwargs:
             for key, value in kwargs.items():
                 if key != "__class__":
                     setattr(self, key, value)
-                if key in ("created_at", "updated_at"):
-                    setattr(self, key, datetime.fromisoformat(value))
+            if "id" not in kwargs:
+                self.id = str(uuid4())
+            if "created_at" not in kwargs:
+                self.created_at = datetime.utcnow()
+            if "updated_at" not in kwargs:
+                self.updated_at = datetime.utcnow()
         else:
-            self.id = str(uuid.uuid4())  # Generates a unique ID
-            self.created_at = datetime.utcnow()  # Set creation time
-            self.updated_at = datetime.utcnow()  # Set last update time
+            self.id = str(uuid4())
+            self.created_at = datetime.utcnow()
+            self.updated_at = datetime.utcnow()
 
     def save(self):
         """Updates the updated_at attribute to the current time"""
