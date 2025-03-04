@@ -69,12 +69,15 @@ class HBnBFacade:
         self.amenity_repo.update(amenity)
         return amenity
 
-    # ------------- Place Management Methods (NEW) -------------
-    def create_place(self, place_data):
+    # ------------- Place Management Methods -------------
+        def create_place(self, place_data):
         """Creates a new Place and stores it in the repository"""
 
         # Validate user_id (owner)
-        if 'user_id' not in place_data or not self.user_repo.get(place_data['user_id']):
+        user = self.get_user(place_data['user_id'])  # Explicitly use get_user
+        print(f"DEBUG: Retrieved user {place_data['user_id']}: {user}")  # Debug print
+
+        if 'user_id' not in place_data or not user:
             raise ValueError("Invalid user_id: User does not exist")
 
         # Validate required numeric attributes
