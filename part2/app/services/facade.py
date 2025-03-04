@@ -1,10 +1,41 @@
 from app.models.amenity import Amenity
-from ..persistence.repository import InMemoryRepository
+from app.models.user import User  # Import User model
+from app.persistence.repository import InMemoryRepository  # Correct import
 
 class HBnBFacade:
     def __init__(self):
+        # Separate repositories for Users and Amenities
+        self.user_repo = InMemoryRepository()
         self.amenity_repo = InMemoryRepository()
 
+    # User Management Methods
+    def create_user(self, user_data):
+        """Creates a new User and stores it in the repository"""
+        user = User(**user_data)
+        self.user_repo.add(user)
+        return user
+
+    def get_user(self, user_id):
+        """Retrieves a User by its ID"""
+        return self.user_repo.get(user_id)
+
+    def get_all_users(self):
+        """Retrieves all users"""
+        return list(self.user_repo.get_all())  # Convert to list for JSON response
+
+    def update_user(self, user_id, user_data):
+        """Updates an existing User's details"""
+        user = self.user_repo.get(user_id)
+        if not user:
+            return None
+
+        for key, value in user_data.items():
+            setattr(user, key, value)
+
+        self.user_repo.update(user)
+        return user
+
+    # Amenity Management Methods (Already Correct)
     def create_amenity(self, amenity_data):
         """Creates a new Amenity and stores it in the repository"""
         amenity = Amenity(**amenity_data)
@@ -17,7 +48,7 @@ class HBnBFacade:
 
     def get_all_amenities(self):
         """Retrieves all amenities"""
-        return self.amenity_repo.get_all()
+        return list(self.amenity_repo.get_all())
 
     def update_amenity(self, amenity_id, amenity_data):
         """Updates an existing Amenity's details"""
