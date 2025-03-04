@@ -2,6 +2,7 @@ from app.models.amenity import Amenity
 from app.models.user import User
 from app.models.place import Place  # Import Place model
 from app.persistence.repository import InMemoryRepository
+from datetime import datetime
 
 
 class HBnBFacade:
@@ -100,25 +101,11 @@ class HBnBFacade:
         # Create and store place
         place = Place(**place_data)
         self.place_repo.add(place)
-        return place
 
+        # Convert datetime fields before returning JSON
+        place_dict = place.__dict__
+        for key, value in place_dict.items():
+            if isinstance(value, datetime):
+                place_dict[key] = value.isoformat()  # Convert to string
 
-    def get_place(self, place_id):
-        """Retrieves a Place by its ID"""
-        return self.place_repo.get(place_id)
-
-    def get_all_places(self):
-        """Retrieves all places"""
-        return list(self.place_repo.get_all())
-
-    def update_place(self, place_id, place_data):
-        """Updates an existing Place"""
-        place = self.place_repo.get(place_id)
-        if not place:
-            return None
-
-        for key, value in place_data.items():
-            setattr(place, key, value)
-
-        self.place_repo.update(place)
-        return place
+        return place_dict
