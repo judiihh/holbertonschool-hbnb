@@ -125,37 +125,39 @@ class HBnBFacade:
         self.place_repo.update(place)
         return place
 
-    # ----------------- Review Management -----------------
+    # ------------- Review Management Methods -------------
     def create_review(self, review_data):
-        """Creates a new Review and stores it"""
-        # Validate user and place existence
-        if not self.get_user(review_data.get("user_id")):
+        """Creates a new Review and stores it in the repository"""
+
+        # Validate user_id
+        user = self.get_user(review_data.get("user_id"))
+        if not user:
             raise ValueError("Invalid user_id: User does not exist")
 
-        if not self.get_place(review_data.get("place_id")):
+        # Validate place_id
+        place = self.get_place(review_data.get("place_id"))
+        if not place:
             raise ValueError("Invalid place_id: Place does not exist")
 
+        # Validate text field
         if "text" not in review_data or not review_data["text"].strip():
             raise ValueError("Review text is required")
 
+        # Create and store the review
         review = Review(**review_data)
         self.review_repo.add(review)
-        return review
+        return review.to_dict()
 
     def get_review(self, review_id):
-        """Retrieve a review by ID"""
+        """Retrieves a Review by its ID"""
         return self.review_repo.get(review_id)
 
     def get_all_reviews(self):
-        """Retrieve all reviews"""
-        return list(self.review_repo.get_all())
-
-    def get_reviews_by_place(self, place_id):
-        """Retrieve all reviews for a specific place"""
-        return [review for review in self.review_repo.get_all() if review.place_id == place_id]
+        """Retrieves all reviews"""
+        return [review.to_dict() for review in self.review_repo.get_all()]
 
     def update_review(self, review_id, review_data):
-        """Update an existing review"""
+        """Updates an existing Review"""
         review = self.review_repo.get(review_id)
         if not review:
             return None
@@ -164,13 +166,16 @@ class HBnBFacade:
             setattr(review, key, value)
 
         self.review_repo.update(review)
-        return review
+        return review.to_dict()
 
     def delete_review(self, review_id):
-        """Deletes a review"""
+        """Deletes a Review"""
         review = self.review_repo.get(review_id)
-        if not review:
-            return None
+        if review:
+            del self.review_repo.storage[review_id]
+            return True
+        return False
 
-        del self.review_repo.storage[review_id]
-        return review
+    def get_reviews_by_place(self, place_id):
+        """Retrieves all reviews for a specific place"""
+        return [review.to_dict() for review in self.review_repo.get_all() if review.place_id == place_id]
