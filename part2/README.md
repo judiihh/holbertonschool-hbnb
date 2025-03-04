@@ -72,11 +72,6 @@ The API endpoints will be available at:
 - **Places:** `http://127.0.0.1:5000/api/v1/places/`
 - **Reviews:** `http://127.0.0.1:5000/api/v1/reviews/`
 
-Swagger documentation can be viewed at:
-
-- **Swagger UI:** [http://127.0.0.1:5000/doc/]
-(This only works running with flask inside local machine)
-
 ---
 
 ## 🔧 API Endpoints
@@ -157,7 +152,8 @@ OK
 View API documentation at:
 
 ```
-http://127.0.0.1:5000/doc/
+http://127.0.0.1:5000/
+(This only works running with flask inside local machine)
 ```
 
 ---
