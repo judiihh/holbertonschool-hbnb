@@ -1,13 +1,12 @@
 from app.models.amenity import Amenity
 from app.models.user import User
 from app.models.place import Place
-from app.persistence.repository import InMemoryRepository
 from app.models.review import Review
-
+from app.persistence.repository import InMemoryRepository
 
 class HBnBFacade:
     def __init__(self):
-        # Separate repositories for Users, Amenities, and Places
+        """Initialize repositories for Users, Amenities, Places, and Reviews"""
         self.user_repo = InMemoryRepository()
         self.amenity_repo = InMemoryRepository()
         self.place_repo = InMemoryRepository()
@@ -18,75 +17,31 @@ class HBnBFacade:
         """Creates a new User and stores it in the repository"""
         user = User(**user_data)
         self.user_repo.add(user)
-        return user
+        print(f"DEBUG: Stored user {user.id}: {user.to_dict()}")  # Debugging
+        return user.to_dict()
 
     def get_user(self, user_id):
         """Retrieves a User by its ID"""
-        print(f"DEBUG: Looking for user with ID: {user_id}")  # Add this
+        print(f"DEBUG: Looking for user with ID: {user_id}")  # Debugging
         user = self.user_repo.get(user_id)
-        print(f"DEBUG: Found user: {user}")  # Add this
+        print(f"DEBUG: Found user: {user}")  # Debugging
         return user
-
-    def get_user_by_email(self, email):
-        """Retrieves a user by their email"""
-        return self.user_repo.get_by_attribute('email', email)
 
     def get_all_users(self):
         """Retrieves all users"""
-        return list(self.user_repo.get_all())
-
-    def update_user(self, user_id, user_data):
-        """Updates an existing User's details"""
-        user = self.user_repo.get(user_id)
-        if not user:
-            return None
-
-        for key, value in user_data.items():
-            setattr(user, key, value)
-
-        self.user_repo.update(user)
-        return user
-
-    # ------------- Amenity Management Methods -------------
-    def create_amenity(self, amenity_data):
-        """Creates a new Amenity and stores it in the repository"""
-        amenity = Amenity(**amenity_data)
-        self.amenity_repo.add(amenity)
-        return amenity
-
-    def get_amenity(self, amenity_id):
-        """Retrieves an Amenity by its ID"""
-        return self.amenity_repo.get(amenity_id)
-
-    def get_all_amenities(self):
-        """Retrieves all amenities"""
-        return list(self.amenity_repo.get_all())
-
-    def update_amenity(self, amenity_id, amenity_data):
-        """Updates an existing Amenity's details"""
-        amenity = self.amenity_repo.get(amenity_id)
-        if not amenity:
-            return None
-
-        for key, value in amenity_data.items():
-            setattr(amenity, key, value)
-
-        self.amenity_repo.update(amenity)
-        return amenity
+        return [user.to_dict() for user in self.user_repo.get_all()]
 
     # ------------- Place Management Methods -------------
     def create_place(self, place_data):
         """Creates a new Place and stores it in the repository"""
-
         print(f"DEBUG: Received place data: {place_data}")  # Debugging
 
-        # Validate user_id (owner)
-        user = self.get_user(place_data['user_id'])  # Explicitly use get_user
+        # Validate user_id
+        user = self.get_user(place_data['user_id'])
         print(f"DEBUG: Retrieved user {place_data['user_id']}: {user}")  # Debugging
 
         if not user:
-            print("DEBUG: User does not exist!")  # Debugging
-            return None  # Instead of raising error, return None to avoid crashing
+            raise ValueError("Invalid user_id: User does not exist")
 
         # Validate required numeric attributes
         if 'price_by_night' not in place_data or place_data['price_by_night'] < 0:
@@ -103,27 +58,16 @@ class HBnBFacade:
         self.place_repo.add(place)
         print(f"DEBUG: Created place: {place.to_dict()}")  # Debugging
 
-        return place
+        return place.to_dict()
 
     def get_place(self, place_id):
         """Retrieves a Place by its ID"""
-        return self.place_repo.get(place_id)
+        place = self.place_repo.get(place_id)
+        return place.to_dict() if place else None
 
     def get_all_places(self):
         """Retrieves all places"""
-        return list(self.place_repo.get_all())
-
-    def update_place(self, place_id, place_data):
-        """Updates an existing Place"""
-        place = self.place_repo.get(place_id)
-        if not place:
-            return None
-
-        for key, value in place_data.items():
-            setattr(place, key, value)
-
-        self.place_repo.update(place)
-        return place
+        return [place.to_dict() for place in self.place_repo.get_all()]
 
     # ------------- Review Management Methods -------------
     def create_review(self, review_data):
@@ -131,11 +75,13 @@ class HBnBFacade:
 
         # Validate user_id
         user = self.get_user(review_data.get("user_id"))
+        print(f"DEBUG: Looking for user with ID: {review_data.get('user_id')} -> Found: {user}")  # Debugging
         if not user:
             raise ValueError("Invalid user_id: User does not exist")
 
         # Validate place_id
         place = self.get_place(review_data.get("place_id"))
+        print(f"DEBUG: Looking for place with ID: {review_data.get('place_id')} -> Found: {place}")  # Debugging
         if not place:
             raise ValueError("Invalid place_id: Place does not exist")
 
@@ -150,7 +96,8 @@ class HBnBFacade:
 
     def get_review(self, review_id):
         """Retrieves a Review by its ID"""
-        return self.review_repo.get(review_id)
+        review = self.review_repo.get(review_id)
+        return review.to_dict() if review else None
 
     def get_all_reviews(self):
         """Retrieves all reviews"""
