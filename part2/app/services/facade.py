@@ -70,7 +70,7 @@ class HBnBFacade:
         return amenity
 
     # ------------- Place Management Methods -------------
-        def create_place(self, place_data):
+    def create_place(self, place_data):
         """Creates a new Place and stores it in the repository"""
 
         # Validate user_id (owner)
