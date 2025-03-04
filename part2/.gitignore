@@ -11,3 +11,4 @@ __pycache__
 # Explicitly track these files and directories
 !README.md
 !app/
+!appTests.py
