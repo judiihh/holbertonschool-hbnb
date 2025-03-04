@@ -98,6 +98,10 @@ class HBnBFacade:
         if 'longitude' in place_data and not (-180 <= place_data['longitude'] <= 180):
             raise ValueError("Longitude must be between -180 and 180")
 
+    def get_all_places(self):
+        """Retrieves all places"""
+        return list(self.place_repo.get_all())  # Convert to a list for JSON response
+
         # Create and store place
         place = Place(**place_data)
         self.place_repo.add(place)
