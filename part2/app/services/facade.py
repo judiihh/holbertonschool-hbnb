@@ -19,6 +19,10 @@ class HBnBFacade:
         """Retrieves a User by its ID"""
         return self.user_repo.get(user_id)
 
+    def get_user_by_email(self, email):
+        """Retrieves a user by their email"""
+        return self.user_repo.get_by_attribute('email', email)
+
     def get_all_users(self):
         """Retrieves all users"""
         return list(self.user_repo.get_all())  # Convert to list for JSON response
