@@ -6,4 +6,4 @@ class Amenity(BaseModel):
     def __init__(self, *args, **kwargs):
         """Initializes an Amenity instance"""
         super().__init__(*args, **kwargs)
-        self.name = ""
+        self.name = kwargs.get('name', "")  # Fix: Get 'name' from kwargs
