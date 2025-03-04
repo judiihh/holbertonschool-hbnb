@@ -1,2 +1,12 @@
 .venv
 __pycache__
+
+# Ignore everything
+*
+
+# Don't ignore directories so Git can traverse them
+!*/
+
+# Explicitly track these files and directories
+!README.md
+!app/
