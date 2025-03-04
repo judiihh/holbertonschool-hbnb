@@ -1,20 +1,15 @@
 from app.models.amenity import Amenity
 from app.models.user import User
-from app.models.place import Place  # Import Place model
+from app.models.place import Place
 from app.persistence.repository import InMemoryRepository
-from datetime import datetime
 
 
 class HBnBFacade:
     def __init__(self):
-        """Initialize repositories for Users, Amenities, and Places"""
+        # Separate repositories for Users, Amenities, and Places
         self.user_repo = InMemoryRepository()
         self.amenity_repo = InMemoryRepository()
-        self.place_repo = InMemoryRepository()  # Added for Places
-
-        # DEBUG: Preload test users (Temporary fix if users don't persist)
-        test_user = User(id="1fa84864-a4e1-46d2-adf7-d121d18ac200", first_name="Alice", last_name="Smith", email="alice@example.com")
-        self.user_repo.add(test_user)
+        self.place_repo = InMemoryRepository()
 
     # ------------- User Management Methods -------------
     def create_user(self, user_data):
@@ -78,15 +73,15 @@ class HBnBFacade:
     def create_place(self, place_data):
         """Creates a new Place and stores it in the repository"""
 
-        # Debugging - Print user_id before checking
-        print(f"DEBUG: Checking user_id: {place_data.get('user_id')}")
+        print(f"DEBUG: Received place data: {place_data}")  # Debugging
 
         # Validate user_id (owner)
         user = self.get_user(place_data['user_id'])  # Explicitly use get_user
-        print(f"DEBUG: Retrieved user {place_data['user_id']}: {user}")  # Debug print
+        print(f"DEBUG: Retrieved user {place_data['user_id']}: {user}")  # Debugging
 
         if not user:
-            raise ValueError("Invalid user_id: User does not exist")
+            print("DEBUG: User does not exist!")  # Debugging
+            return None  # Instead of raising error, return None to avoid crashing
 
         # Validate required numeric attributes
         if 'price_by_night' not in place_data or place_data['price_by_night'] < 0:
@@ -98,18 +93,30 @@ class HBnBFacade:
         if 'longitude' in place_data and not (-180 <= place_data['longitude'] <= 180):
             raise ValueError("Longitude must be between -180 and 180")
 
-    def get_all_places(self):
-        """Retrieves all places"""
-        return list(self.place_repo.get_all())  # Convert to a list for JSON response
-
         # Create and store place
         place = Place(**place_data)
         self.place_repo.add(place)
+        print(f"DEBUG: Created place: {place.to_dict()}")  # Debugging
 
-        # Convert datetime fields before returning JSON
-        place_dict = place.__dict__
-        for key, value in place_dict.items():
-            if isinstance(value, datetime):
-                place_dict[key] = value.isoformat()  # Convert to string
+        return place
 
-        return place_dict
+    def get_place(self, place_id):
+        """Retrieves a Place by its ID"""
+        return self.place_repo.get(place_id)
+
+    def get_all_places(self):
+        """Retrieves all places"""
+        return list(self.place_repo.get_all())
+
+    def update_place(self, place_id, place_data):
+        """Updates an existing Place"""
+        place = self.place_repo.get(place_id)
+        if not place:
+            return None
+
+        for key, value in place_data.items():
+            setattr(place, key, value)
+
+        self.place_repo.update(place)
+        return place
+
