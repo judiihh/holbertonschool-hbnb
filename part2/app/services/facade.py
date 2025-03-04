@@ -1,5 +1,5 @@
 from app.models.amenity import Amenity
-from app.persistence.repository import InMemoryRepository
+from ..persistence.repository import InMemoryRepository
 
 class HBnBFacade:
     def __init__(self):
