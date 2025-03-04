@@ -3,6 +3,7 @@ from app.models.user import User
 from app.models.place import Place  # Import Place model
 from app.persistence.repository import InMemoryRepository
 
+
 class HBnBFacade:
     def __init__(self):
         # Separate repositories for Users, Amenities, and Places
@@ -71,20 +72,23 @@ class HBnBFacade:
     # ------------- Place Management Methods (NEW) -------------
     def create_place(self, place_data):
         """Creates a new Place and stores it in the repository"""
-        place = Place(**place_data)
 
         # Validate user_id (owner)
-        if not place.user_id:
-            raise ValueError("user_id is required")
+        if 'user_id' not in place_data or not self.user_repo.get(place_data['user_id']):
+            raise ValueError("Invalid user_id: User does not exist")
 
-        # Validate price, latitude, and longitude
-        if place.price_by_night < 0:
-            raise ValueError("Price must be a positive number")
-        if not (-90 <= place.latitude <= 90):
+        # Validate required numeric attributes
+        if 'price_by_night' not in place_data or place_data['price_by_night'] < 0:
+            raise ValueError("price_by_night is required and must be positive")
+
+        if 'latitude' in place_data and not (-90 <= place_data['latitude'] <= 90):
             raise ValueError("Latitude must be between -90 and 90")
-        if not (-180 <= place.longitude <= 180):
+
+        if 'longitude' in place_data and not (-180 <= place_data['longitude'] <= 180):
             raise ValueError("Longitude must be between -180 and 180")
 
+        # Create and store place
+        place = Place(**place_data)
         self.place_repo.add(place)
         return place
 
