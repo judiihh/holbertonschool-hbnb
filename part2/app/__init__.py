@@ -7,15 +7,10 @@ from app.api.v1.amenities import api as amenities_ns
 from app.api.v1.places import api as places_ns
 from app.api.v1.reviews import api as reviews_ns
 
-# Import your Facade
-from app.facade import HBnBFacade
-
-# Create a single facade instance at the top level so it’s available app-wide
-facade = HBnBFacade()
-
 def create_app():
     """Initialize Flask app and set up API."""
     app = Flask(__name__)
+
     api = Api(
         app,
         version='1.0',

@@ -1,11 +1,11 @@
 from .base_model import BaseModel
 
 class Review(BaseModel):
-    """Review model linked to a Place"""
+    """Represents a review of a place."""
 
     def __init__(self, *args, **kwargs):
-        """Initializes a Review instance"""
+        """Initialize a Review instance with given attributes."""
         super().__init__(*args, **kwargs)
-        self.place_id = ""
-        self.user_id = ""
-        self.text = ""
+        self.user_id = kwargs.get("user_id", "")
+        self.place_id = kwargs.get("place_id", "")
+        self.text = kwargs.get("text", "")

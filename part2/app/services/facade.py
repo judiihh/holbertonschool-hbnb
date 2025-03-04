@@ -3,6 +3,7 @@ from app.models.user import User
 from app.models.place import Place
 from app.models.review import Review
 from app.persistence.repository import InMemoryRepository
+import re
 
 class HBnBFacade:
     def __init__(self):
@@ -14,7 +15,15 @@ class HBnBFacade:
 
     # ------------- User Management Methods -------------
     def create_user(self, user_data):
-        """Creates a new User and stores it in the repository"""
+        """Creates a new User and stores it in the repository with validation"""
+        # Validate user data
+        self.validate_user(user_data)
+
+        # Check for duplicate email before storing the user.
+        existing_user = self.get_user_by_email(user_data["email"])
+        if existing_user:
+            raise ValueError(f"User with email {user_data['email']} already exists.")
+
         user = User(**user_data)
         self.user_repo.add(user)
         print(f"DEBUG: Stored user {user.id}: {user.to_dict()}")  # Debugging
@@ -25,11 +34,55 @@ class HBnBFacade:
         print(f"DEBUG: Looking for user with ID: {user_id}")  # Debugging
         user = self.user_repo.get(user_id)
         print(f"DEBUG: Found user: {user}")  # Debugging
-        return user
+        if user:
+            return user.to_dict()
+        return None
 
     def get_all_users(self):
         """Retrieves all users"""
         return [user.to_dict() for user in self.user_repo.get_all()]
+
+    @staticmethod
+    def validate_user(user_data):
+        # Validate first name
+        first_name = user_data.get("first_name", "").strip()
+        if not first_name:
+            raise ValueError("First name cannot be empty")
+
+        # Validate last name
+        last_name = user_data.get("last_name", "").strip()
+        if not last_name:
+            raise ValueError("Last name cannot be empty")
+
+        # Validate email
+        email = user_data.get("email", "").strip()
+        if not email:
+            raise ValueError("Email cannot be empty")
+
+        # Basic email format check
+        if not re.match(r"[^@]+@[^@]+\.[^@]+", email):
+            raise ValueError("Invalid email format")
+
+    def get_user_by_email(self, email):
+        """Retrieve a user by email from the in-memory repository."""
+        if not email:
+            return None
+        return self.user_repo.get_by_attribute('email', email)
+
+    def update_user(self, user_id, user_data):
+        """Updates an existing user with the provided data.
+        Returns the updated user dictionary if successful; otherwise, None.
+        """
+        user = self.user_repo.get(user_id)
+        if not user:
+            return None
+
+        # Update allowed attributes. You might want to restrict which fields can be updated.
+        for key, value in user_data.items():
+            setattr(user, key, value)
+
+        self.user_repo.update(user)
+        return user.to_dict()
 
     # ------------- Amenity Management Methods -------------
     def create_amenity(self, amenity_data):
@@ -37,11 +90,17 @@ class HBnBFacade:
         Creates a new Amenity and stores it in the repository.
         If you need validations (e.g., name required), add them here.
         """
+        validate_amenity(amenity_data)
         print(f"DEBUG: Creating amenity with data: {amenity_data}")  # Debugging
         amenity = Amenity(**amenity_data)
         self.amenity_repo.add(amenity)
         print(f"DEBUG: Created amenity: {amenity.to_dict()}")  # Debugging
         return amenity.to_dict()
+
+    def validate_amenity(amenity_data):
+        name = amenity_data.get("name", "").strip()
+        if not name:
+            raise ValueError("Amenity name cannot be empty")
 
     def get_amenity(self, amenity_id):
         """Retrieves an Amenity by its ID"""
@@ -105,6 +164,18 @@ class HBnBFacade:
     def get_all_places(self):
         """Retrieves all places"""
         return [place.to_dict() for place in self.place_repo.get_all()]
+
+    def validate_place(place_data):
+        if not place_data.get("name"):
+            raise ValueError("Place name is required")
+        if "price_by_night" not in place_data or place_data["price_by_night"] < 0:
+            raise ValueError("price_by_night is required and must be positive")
+        lat = place_data.get("latitude", 0)
+        if not (-90 <= lat <= 90):
+            raise ValueError("Latitude must be between -90 and 90")
+        lng = place_data.get("longitude", 0)
+        if not (-180 <= lng <= 180):
+            raise ValueError("Longitude must be between -180 and 180")
 
     def update_place(self, place_id, place_data):
         """Updates an existing Place"""

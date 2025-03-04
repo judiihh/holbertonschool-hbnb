@@ -1,14 +1,20 @@
 from flask_restx import Namespace, Resource, fields
-from app.services.facade import HBnBFacade
+from app.services import facade
 
 api = Namespace('reviews', description='Review operations')
 
-facade = HBnBFacade()  # Initialize the facade
-
+# Model for creating a review (all fields required)
 review_model = api.model('Review', {
     'user_id': fields.String(required=True, description='ID of the user writing the review'),
     'place_id': fields.String(required=True, description='ID of the place being reviewed'),
     'text': fields.String(required=True, description='Review text'),
+})
+
+# Model for updating a review (all fields optional)
+review_update_model = api.model('ReviewUpdate', {
+    'user_id': fields.String(description='ID of the user writing the review'),
+    'place_id': fields.String(description='ID of the place being reviewed'),
+    'text': fields.String(description='Review text'),
 })
 
 @api.route('/')
@@ -40,9 +46,9 @@ class ReviewResource(Resource):
         review = facade.get_review(review_id)
         if not review:
             return {'error': 'Review not found'}, 404
-        return review.to_dict(), 200
+        return review, 200
 
-    @api.expect(review_model, validate=True)
+    @api.expect(review_update_model, validate=True)
     @api.response(200, 'Review successfully updated')
     @api.response(404, 'Review not found')
     def put(self, review_id):
