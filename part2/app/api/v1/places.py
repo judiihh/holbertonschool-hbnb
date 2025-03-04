@@ -64,3 +64,11 @@ class PlaceResource(Resource):
         if not updated_place:
             return {'error': 'Place not found'}, 404
         return updated_place.to_dict(), 200  # Fix: Use .to_dict()
+
+@api.route("/<string:place_id>/reviews")
+class PlaceReviews(Resource):
+    @api.response(200, "List of reviews for the place retrieved successfully")
+    def get(self, place_id):
+        """Retrieve all reviews for a specific place"""
+        reviews = facade.get_reviews_by_place(place_id)
+        return [review.to_dict() for review in reviews], 200
