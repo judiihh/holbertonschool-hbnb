@@ -1,4 +1,4 @@
-# HBnB Project - Part 1
+# 🏠 HBnB Project - Part 1
 
 ## **📌 Project Overview**
 The **HBnB Evolution** project is a simplified version of an Airbnb-like application. This repository contains the **technical documentation** for **Part 1** of the project, focusing on the **system's architecture, business logic, and API interactions**.
