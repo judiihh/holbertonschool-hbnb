@@ -3,6 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_jwt_extended import JWTManager
 from flask_bcrypt import Bcrypt
 from config import Config  # or import a specific config like DevelopmentConfig
+from app.routes.auth import auth_bp
 
 # Initialize extensions outside of the factory
 db = SQLAlchemy()
@@ -14,6 +15,9 @@ def create_app(config_object=Config):
     app = Flask(__name__)
     # Load configuration from the provided config object
     app.config.from_object(config_object)
+    # auth_bp blueprint
+    app.register_blueprint(auth_bp)
+
 
     # Initialize the extensions with the app instance
     db.init_app(app)
