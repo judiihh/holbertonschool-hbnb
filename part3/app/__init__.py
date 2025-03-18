@@ -1,11 +1,13 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_jwt_extended import JWTManager
+from flask_bcrypt import Bcrypt
 from config import Config  # or import a specific config like DevelopmentConfig
 
 # Initialize extensions outside of the factory
 db = SQLAlchemy()
 jwt = JWTManager()
+bcrypt = Bcrypt()  # Initialize Flask-Bcrypt
 
 def create_app(config_object=Config):
     """Application Factory for creating a Flask app instance."""
@@ -16,6 +18,7 @@ def create_app(config_object=Config):
     # Initialize the extensions with the app instance
     db.init_app(app)
     jwt.init_app(app)
+    bcrypt.init_app(app)  # Set up Bcrypt with the app
 
     # Example: register blueprints or routes here
     # from app.routes import main
