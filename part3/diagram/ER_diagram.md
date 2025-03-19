@@ -15,15 +15,15 @@ erDiagram
         float price
         float latitude
         float longitude
-        int owner_id FK
+        int owner_id
     }
 
     REVIEW {
         int id PK
         string text
         int rating
-        int user_id FK
-        int place_id FK
+        int user_id
+        int place_id
     }
 
     AMENITY {
@@ -32,8 +32,8 @@ erDiagram
     }
 
     PLACE_AMENITY {
-        int place_id PK FK
-        int amenity_id PK FK
+        int place_id PK
+        int amenity_id PK
     }
 
     USER ||--o{ PLACE : owns
