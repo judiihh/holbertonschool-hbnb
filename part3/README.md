@@ -43,7 +43,7 @@ Switched from **in-memory storage** to **persistent database storage**. Used **S
 ```mermaid
 erDiagram
     USERS {
-      int id PK "Primary key"
+      int id PK
       string username
       string email
       string password_hash
@@ -57,7 +57,7 @@ erDiagram
       string name
       text description
       int price
-      int owner_id FK "References USERS(id)"
+      int owner_id FK
       datetime created_at
       datetime updated_at
     }
@@ -66,8 +66,8 @@ erDiagram
       int id PK
       text content
       int rating
-      int user_id FK "References USERS(id)"
-      int place_id FK "References PLACES(id)"
+      int user_id FK
+      int place_id FK
       datetime created_at
       datetime updated_at
     }
@@ -81,8 +81,8 @@ erDiagram
     }
 
     PLACE_AMENITY {
-      int place_id PK FK "References PLACES(id)"
-      int amenity_id PK FK "References AMENITIES(id)"
+      int place_id PK FK
+      int amenity_id PK FK
     }
 
     USERS ||--o{ PLACES : "owns"
