@@ -1,3 +1,4 @@
+```mermaid
 erDiagram
     USERS {
       int id PK
@@ -49,3 +50,4 @@ erDiagram
     PLACES ||--o{ REVIEWS : has
     PLACES ||--o{ PLACE_AMENITY : linked
     AMENITIES ||--o{ PLACE_AMENITY : linked
+```
