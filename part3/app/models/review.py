@@ -6,8 +6,10 @@ class Review(BaseModel):
 
     content = db.Column(db.Text, nullable=False)
     rating = db.Column(db.Integer, nullable=False)
-    user_id = db.Column(db.Integer, nullable=False)   # For now, no foreign key constraint
-    place_id = db.Column(db.Integer, nullable=False)  # For now, no foreign key constraint
+
+    # Foreign keys: linking the review to its author (User) and the reviewed place.
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    place_id = db.Column(db.Integer, db.ForeignKey('places.id'), nullable=False)
 
     def to_dict(self):
         return {

@@ -11,22 +11,23 @@ class User(BaseModel):
     password_hash = db.Column(db.String(128), nullable=False)
     is_admin = db.Column(db.Boolean, default=False)
 
+    # One-to-Many: A user can own many places.
+    places = db.relationship('Place', backref='owner', lazy=True)
+    # One-to-Many: A user can write many reviews.
+    reviews = db.relationship('Review', backref='user', lazy=True)
+
     @property
     def password(self):
-        """Prevents accessing the password directly."""
         raise AttributeError("password is not a readable attribute")
 
     @password.setter
     def password(self, plain_password):
-        """Hashes the password on setting."""
         self.password_hash = bcrypt.generate_password_hash(plain_password).decode('utf-8')
 
     def check_password(self, password):
-        """Verifies the password against the stored hash."""
         return bcrypt.check_password_hash(self.password_hash, password)
 
     def to_dict(self):
-        """Serializes the user object without sensitive data."""
         return {
             'id': self.id,
             'username': self.username,

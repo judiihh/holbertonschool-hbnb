@@ -1,11 +1,15 @@
 from app import db
 from app.models.base_model import BaseModel
+from app.models.association import place_amenity  # Import the association table
 
 class Amenity(BaseModel):
     __tablename__ = 'amenities'
 
     name = db.Column(db.String(128), unique=True, nullable=False)
     description = db.Column(db.String(255), nullable=True)
+
+    # Many-to-Many: An amenity can belong to many places.
+    places = db.relationship('Place', secondary=place_amenity, back_populates='amenities', lazy='subquery')
 
     def to_dict(self):
         return {
