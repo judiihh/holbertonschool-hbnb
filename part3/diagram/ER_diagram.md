@@ -14,7 +14,7 @@ erDiagram
     PLACES {
       int id PK
       string name
-      text description
+      string description
       int price
       int owner_id FK
       datetime created_at
@@ -23,7 +23,7 @@ erDiagram
 
     REVIEWS {
       int id PK
-      text content
+      string content
       int rating
       int user_id FK
       int place_id FK
@@ -44,8 +44,8 @@ erDiagram
       int amenity_id PK FK
     }
 
-    USERS ||--o{ PLACES : "owns"
-    USERS ||--o{ REVIEWS : "writes"
-    PLACES ||--o{ REVIEWS : "has"
-    PLACES ||--o{ PLACE_AMENITY : "linked via"
-    AMENITIES ||--o{ PLACE_AMENITY : "linked via"
+    USERS ||--o{ PLACES : owns
+    USERS ||--o{ REVIEWS : writes
+    PLACES ||--o{ REVIEWS : has
+    PLACES ||--o{ PLACE_AMENITY : linked
+    AMENITIES ||--o{ PLACE_AMENITY : linked
