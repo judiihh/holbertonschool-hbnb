@@ -1,0 +1,11 @@
+.venv
+venv
+__pycache__
+
+
+# Don't ignore directories so Git can traverse them
+!*/
+
+# Explicitly track these files and directories
+!README.md
+!app/
