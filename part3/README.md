@@ -42,51 +42,53 @@ Switched from **in-memory storage** to **persistent database storage**. Used **S
 #### **📌 Entity-Relationship Diagram**
 ```mermaid
 erDiagram
-    USER {
-        CHAR(36) id PK
-        VARCHAR(50) first_name
-        VARCHAR(50) last_name
-        VARCHAR(120) email
-        VARCHAR(128) password
-        BOOLEAN is_admin
+    User {
+        string id PK
+        string first_name
+        string last_name
+        string email
+        string password
+        boolean is_admin
     }
 
-    PLACE {
-        CHAR(36) id PK
-        VARCHAR(100) title
-        TEXT description
-        DECIMAL price
-        FLOAT latitude
-        FLOAT longitude
-        CHAR(36) owner_id FK
+    Place {
+        string id PK
+        string title
+        string description
+        integer number_rooms
+        integer number_bathrooms
+        integer max_guest
+        float price_by_night
+        float price
+        float latitude
+        float longitude
+        string owner_id FK
     }
 
-    REVIEW {
-        CHAR(36) id PK
-        TEXT text
-        INT rating
-        CHAR(36) user_id FK
-        CHAR(36) place_id FK
+    Review {
+        string id PK
+        string text
+        integer rating
+        string user_id FK
+        string place_id FK
     }
 
-    AMENITY {
-        CHAR(36) id PK
-        VARCHAR(50) name
+    Amenity {
+        string id PK
+        string name
     }
 
-    PLACE_AMENITY {
-        CHAR(36) place_id PK, FK
-        CHAR(36) amenity_id PK, FK
+    Place_Amenity {
+        string place_id PK,FK
+        string amenity_id PK,FK
     }
 
-    %% Relationships
-    PLACE }|..|| USER : "belongs to"
-    REVIEW }|--|| USER : "written by"
-    REVIEW }|--|| PLACE : "for"
-    PLACE_AMENITY }|--|| PLACE : "links"
-    PLACE_AMENITY }|--|| AMENITY : "links"
+    User --o{ Place : "owns"
+    User --o{ Review : "writes"
+    Place --o{ Review : "has"
+    Place --o{ Place_Amenity : "has"
+    Amenity ||--o{ Place_Amenity : "belongs to"
 ```
-
 ### **3⃣ API Endpoints with Role-Based Access**
 | **Endpoint**            | **Method**   | **Access**         | **Description**                             |
 |-------------------------|--------------|--------------------|---------------------------------------------|
@@ -150,4 +152,4 @@ flask run
 - 🔹 **Optimize API performance and add caching**
 
 ## **👤 Author**
-- **Judith Espinal** - Holberton School Student
+- **Judith Espinal** - Holberton School Student 
