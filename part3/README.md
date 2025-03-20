@@ -83,10 +83,10 @@ erDiagram
         string amenity_id PK,FK
     }
 
-    User --o{ Place : "owns"
-    User --o{ Review : "writes"
-    Place --o{ Review : "has"
-    Place --o{ Place_Amenity : "has"
+    User ||--o{ Place : owns
+    User ||--o{ Review : writes
+    Place ||--o{ Review : has
+    Place ||--o{ Place_Amenity : has
     Amenity ||--o{ Place_Amenity : "belongs to"
 ```
 ### **3⃣ API Endpoints with Role-Based Access**
