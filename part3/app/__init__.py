@@ -3,6 +3,7 @@ from flask_restx import Api
 from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
 from flask_jwt_extended import JWTManager
+from flask_cors import CORS
 import sys
 import os
 
@@ -24,6 +25,15 @@ def create_app(config_class="config.DevelopmentConfig"):
         app.config.from_object(config_class)
     else:
         app.config.from_object(config_class)
+    
+    # Enable CORS
+    CORS(app, resources={
+        r"/api/*": {
+            "origins": ["http://localhost:5000", "http://127.0.0.1:5000"],
+            "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+            "allow_headers": ["Content-Type", "Authorization"]
+        }
+    })
     
     # Initialize extensions with app
     db.init_app(app)
