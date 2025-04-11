@@ -1,62 +1,155 @@
-# HBnB Frontend
+# 🏠 HBnB Project - Part 3
 
-This is the frontend part of the HBnB (Holberton BnB) project, a web application for property rentals.
+## **📌 Project Overview**
+The **HBnB Evolution** project is an **Airbnb-like application** built with **Flask, SQLAlchemy, and JWT authentication**. This repository contains the **backend implementation for Part 3**, focusing on **user authentication, database integration, and API security**.
 
-## Project Structure
+## **📂 Contents**
+This repository includes:
+- ✅ **JWT-based Authentication**
+- ✅ **Role-Based Access Control (Admin & Users)**
+- ✅ **SQLAlchemy Database Integration**
+- ✅ **CRUD Operations with Persistent Storage**
+- ✅ **Mermaid.js ER Diagram for Database Visualization**
+- ✅ **SQL Scripts for Table Generation and Initial Data**
 
+## **🛠️ Technologies Used**
+- **Python** 🐍 - Flask (REST API)
+- **SQLAlchemy** 🟤 - ORM for database management
+- **Flask-JWT-Extended** 🔒 - Authentication & security
+- **SQLite / MySQL** 🟢 - Database storage (development & production)
+- **Mermaid.js** 📊 - ER diagrams & database visualization
+
+## **🪢 Part 3: Backend Development & Database Integration**
+### **1⃣ User Authentication with JWT**
+Users authenticate using **JWT tokens**, allowing secure login. The system supports **role-based access** (`is_admin` flag). **Password hashing** is implemented using **bcrypt**.
+
+#### **📌 User Login Flow**
+```mermaid
+sequenceDiagram
+    participant User
+    participant API
+    participant Database
+
+    User->>API: Login with email & password
+    API->>Database: Validate credentials
+    Database-->>API: Return user info
+    API-->>User: Return JWT token
 ```
-part4/
-├── images/
-│   ├── icon.svg
-│   └── logo.svg
-├── add_review.html
-├── index.html
-├── login.html
-├── place.html
-├── scripts.js
-└── styles.css
+
+### **2⃣ Database Integration with SQLAlchemy**
+Switched from **in-memory storage** to **persistent database storage**. Used **SQLAlchemy ORM** for database operations. Database supports **SQLite** (development) and **MySQL** (production).
+
+#### **📌 Entity-Relationship Diagram**
+```mermaid
+erDiagram
+    User {
+        string id PK
+        string first_name
+        string last_name
+        string email
+        string password
+        boolean is_admin
+    }
+
+    Place {
+        string id PK
+        string title
+        string description
+        integer number_rooms
+        integer number_bathrooms
+        integer max_guest
+        float price_by_night
+        float price
+        float latitude
+        float longitude
+        string owner_id FK
+    }
+
+    Review {
+        string id PK
+        string text
+        integer rating
+        string user_id FK
+        string place_id FK
+    }
+
+    Amenity {
+        string id PK
+        string name
+    }
+
+    Place_Amenity {
+        string place_id PK,FK
+        string amenity_id PK,FK
+    }
+
+    User ||--o{ Place : owns
+    User ||--o{ Review : writes
+    Place ||--o{ Review : has
+    Place ||--o{ Place_Amenity : has
+    Amenity ||--o{ Place_Amenity : "belongs to"
+```
+### **3⃣ API Endpoints with Role-Based Access**
+| **Endpoint**            | **Method**   | **Access**         | **Description**                             |
+|-------------------------|--------------|--------------------|---------------------------------------------|
+| `/api/v1/auth/login`    | `POST`       | Public             | User login & JWT token generation           |
+| `/api/v1/users/`        | `POST`       | Admin              | Create a new user                           |
+| `/api/v1/users/<id>`     | `PATCH`      | Admin/User         | Update user profile                         |
+| `/api/v1/places/`       | `POST`       | Authenticated Users| Create a new place                          |
+| `/api/v1/places/<id>`    | `PUT/DELETE` | Owner/Admin        | Modify or delete a place                    |
+| `/api/v1/reviews/`      | `POST`       | Authenticated Users| Submit a review                             |
+| `/api/v1/reviews/<id>`   | `PUT/DELETE` | Owner/Admin        | Modify or delete a review                   |
+
+### **4⃣ SQL Scripts for Database Setup**
+A **schema.sql** file was created to generate all tables and insert initial data.
+
+#### **📌 SQL Table Creation (Example)**
+```sql
+CREATE TABLE users (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    username VARCHAR(80) NOT NULL UNIQUE,
+    email VARCHAR(120) NOT NULL UNIQUE,
+    password_hash VARCHAR(128) NOT NULL,
+    is_admin BOOLEAN DEFAULT 0,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
 ```
 
-## Features
+## **🚀 How to Run This Project**
+### **1⃣ Clone the Repository**
+```sh
+git clone https://github.com/judiihh/holbertonschool-hbnb.git
+cd holbertonschool-hbnb/part3
+```
 
-- User authentication (login/logout)
-- List of available places with price filtering
-- Detailed view of each place
-- Review system with ratings
-- Responsive design for all screen sizes
+### **2⃣ Set Up the Virtual Environment**
+```sh
+python3 -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+```
 
-## Setup
+### **3⃣ Install Dependencies**
+```sh
+pip install -r requirements.txt
+```
 
-1. Make sure you have the backend API running on `http://localhost:5000`
-2. Open `index.html` in your web browser
-3. You can log in using the provided credentials
+### **4⃣ Initialize the Database**
+```sh
+flask db init
+flask db migrate -m "Initial migration"
+flask db upgrade
+```
 
-## API Integration
+### **5⃣ Run the API**
+```sh
+flask run
+```
 
-The frontend communicates with the backend API using the following endpoints:
+## **💡 Future Work**
+- 🔹 **Deploy to a production environment using MySQL**
+- 🔹 **Implement Frontend for HBnB**
+- 🔹 **Optimize API performance and add caching**
 
-- `POST /api/v1/auth/login` - User authentication
-- `GET /api/v1/places` - List all places
-- `GET /api/v1/places/:id` - Get place details
-- `POST /api/v1/places/:id/reviews` - Add a review
-
-## Design
-
-The design follows modern web standards with:
-- Clean and intuitive user interface
-- Consistent color scheme (primary color: #ff8c00)
-- Responsive grid layout for places
-- Card-based design for places and reviews
-- User-friendly forms with proper validation
-
-## Browser Support
-
-The application is compatible with:
-- Google Chrome (latest)
-- Mozilla Firefox (latest)
-- Microsoft Edge (latest)
-- Safari (latest)
-
-## Validation
-
-All HTML files have been validated using the W3C Validator and pass without errors.
+## **👤 Author**
+- **Judith Espinal** - Holberton School Student 

@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="HBnB - Place Details">
+    <title>HBnB - Place Details</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/styles.css') }}">
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='images/icon.svg') }}">
+    <style>
+        .place-image {
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        .error-message {
+            background-color: #f8d7da;
+            color: #721c24;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <a href="{{ url_for('index') }}" aria-label="HBnB Home">
+                <img src="{{ url_for('static', filename='images/logo.png') }}" alt="HBnB Logo" class="logo">
+            </a>
+            <a href="{{ url_for('login') }}" class="login-button" role="button">Login</a>
+        </div>
+    </header>
+
+    <main>
+        <section id="place-details" class="place-details" aria-label="Place details">
+            <!-- Place details will be populated dynamically -->
+        </section>
+
+        <section id="reviews" class="reviews-section" aria-label="Reviews">
+            <!-- Reviews will be populated dynamically -->
+        </section>
+
+        <a href="{{ url_for('add_review', place_id='placeholder') }}" class="add-review-button" role="button" style="display: none;">Add Review</a>
+    </main>
+
+    <footer>
+        <p>© 2024 HBnB Evolution. All rights reserved.</p>
+    </footer>
+
+    <script src="{{ url_for('static', filename='scripts/scripts.js') }}"></script>
+</body>
+</html> 

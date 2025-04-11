@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="HBnB - Login to your account">
+    <title>HBnB - Login</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/styles.css') }}">
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='images/icon.svg') }}">
+    <style>
+        .error-message {
+            color: #e74c3c;
+            background-color: #fceaea;
+            border: 1px solid #e74c3c;
+            border-radius: 4px;
+            padding: 10px;
+            margin-bottom: 15px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <a href="{{ url_for('index') }}" aria-label="HBnB Home">
+                <img src="{{ url_for('static', filename='images/logo.png') }}" alt="HBnB Logo" class="logo">
+            </a>
+        </div>
+    </header>
+
+    <main class="login-container">
+        <form id="login-form" class="login-form" aria-label="Login form">
+            <h1>Login</h1>
+            
+            <div id="error-message" class="error-message" role="alert"></div>
+            
+            <div class="form-group">
+                <label for="email">Email:</label>
+                <input type="email" id="email" name="email" required aria-required="true">
+            </div>
+            
+            <div class="form-group">
+                <label for="password">Password:</label>
+                <input type="password" id="password" name="password" required aria-required="true">
+            </div>
+            
+            <button type="submit" class="submit-button">Login</button>
+        </form>
+    </main>
+
+    <footer>
+        <p>© 2024 HBnB Evolution. All rights reserved.</p>
+    </footer>
+
+    <script src="{{ url_for('static', filename='scripts/scripts.js') }}"></script>
+</body>
+</html> 

@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="HBnB - Find and book unique accommodations">
+    <title>HBnB - Available Places</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="icon" type="image/svg+xml" href="images/icon.svg">
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <a href="index.html" aria-label="HBnB Home">
+                <img src="images/logo.png" alt="HBnB Logo" class="logo">
+            </a>
+            <a href="login.html" class="login-button" role="button">Login</a>
+        </div>
+    </header>
+
+    <main>
+        <h1 style="text-align: center;">Available Places</h1>
+        
+        <section id="filter" aria-label="Price filter" style="text-align: center;">
+            <label for="price-filter"><strong>Max Price:</strong></label>
+            <select id="price-filter" aria-label="Select maximum price">
+                <option value="all">All</option>
+                <option value="10">$10</option>
+                <option value="50">$50</option>
+                <option value="100">$100</option>
+            </select>
+        </section>
+
+        <section id="places-list" aria-label="List of available places">
+            <!-- Places will be loaded dynamically -->
+        </section>
+    </main>
+
+    <footer>
+        <p>© 2024 HBnB Evolution. All rights reserved.</p>
+    </footer>
+
+    <script src="scripts.js"></script>
+</body>
+</html> 
