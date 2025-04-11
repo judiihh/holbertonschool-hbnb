@@ -166,11 +166,6 @@ h1 {
     margin-top: 0.5rem;
 }
 
-.rating::before {
-    content: "Rating: ";
-    font-weight: bold;
-}
-
 .add-review-button {
     display: inline-block;
     background-color: #e1a6ad;
