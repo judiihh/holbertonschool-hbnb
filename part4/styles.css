@@ -242,6 +242,14 @@ h1 {
     max-width: 800px;
     margin: 0 auto;
     padding: 2rem;
+    text-align: center;
+}
+
+.review-container h1,
+.review-container h2 {
+    margin-bottom: 2rem;
+    color: #333;
+    text-align: center;
 }
 
 .review-form {
