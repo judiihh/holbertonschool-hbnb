@@ -7,25 +7,9 @@ if (loginForm) {
         const password = document.getElementById('password').value;
 
         try {
-            const response = await fetch('http://localhost:5000/api/v1/auth/login', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ email, password }),
-            });
-
-            if (response.ok) {
-                const data = await response.json();
-                // Store the token in a cookie
-                document.cookie = `auth_token=${data.token}; path=/`;
-                window.location.href = 'index.html';
-            } else {
-                alert('Invalid credentials');
-            }
+            await loginUser(email, password);
         } catch (error) {
-            console.error('Error:', error);
-            alert('An error occurred during login');
+            showError('An error occurred during login. Please try again.');
         }
     });
 }
@@ -129,4 +113,50 @@ function updateAuthUI() {
 // Initialize the page
 document.addEventListener('DOMContentLoaded', () => {
     updateAuthUI();
-}); 
+});
+
+async function loginUser(email, password) {
+    try {
+        const response = await fetch('http://localhost:5001/api/v1/auth/login', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ email, password })
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            // Store the token in a cookie that expires in 24 hours
+            const expirationDate = new Date();
+            expirationDate.setTime(expirationDate.getTime() + (24 * 60 * 60 * 1000));
+            document.cookie = `token=${data.access_token}; expires=${expirationDate.toUTCString()}; path=/`;
+            
+            // Redirect to main page
+            window.location.href = 'index.html';
+        } else {
+            const errorData = await response.json();
+            showError(errorData.message || 'Login failed. Please check your credentials.');
+        }
+    } catch (error) {
+        throw new Error('Network error or server not responding');
+    }
+}
+
+function showError(message) {
+    // Remove any existing error message
+    const existingError = document.querySelector('.error-message');
+    if (existingError) {
+        existingError.remove();
+    }
+
+    // Create and show new error message
+    const errorDiv = document.createElement('div');
+    errorDiv.className = 'error-message';
+    errorDiv.style.color = 'red';
+    errorDiv.style.marginBottom = '1rem';
+    errorDiv.textContent = message;
+
+    const form = document.getElementById('login-form');
+    form.insertBefore(errorDiv, form.firstChild);
+} 
