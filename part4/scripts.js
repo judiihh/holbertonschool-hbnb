@@ -164,7 +164,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 async function loginUser(email, password) {
     try {
-        const response = await fetch('http://localhost:5001/api/v1/auth/login', {
+        const response = await fetch('http://localhost:5000/api/v1/auth/login', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -237,7 +237,7 @@ async function fetchPlaces(token) {
             headers['Authorization'] = `Bearer ${token}`;
         }
 
-        const response = await fetch('http://localhost:5001/api/v1/places', {
+        const response = await fetch('http://localhost:5000/api/v1/places', {
             method: 'GET',
             headers: headers
         });
@@ -325,7 +325,7 @@ async function fetchPlaceDetails(token, placeId) {
             headers['Authorization'] = `Bearer ${token}`;
         }
 
-        const response = await fetch(`http://localhost:5001/api/v1/places/${placeId}`, {
+        const response = await fetch(`http://localhost:5000/api/v1/places/${placeId}`, {
             method: 'GET',
             headers: headers
         });
@@ -428,7 +428,7 @@ async function fetchPlaceNameForReview(token, placeId) {
             headers['Authorization'] = `Bearer ${token}`;
         }
 
-        const response = await fetch(`http://localhost:5001/api/v1/places/${placeId}`, {
+        const response = await fetch(`http://localhost:5000/api/v1/places/${placeId}`, {
             method: 'GET',
             headers: headers
         });
@@ -459,7 +459,7 @@ function updateReviewFormTitle(placeName) {
 // Submit review to API
 async function submitReview(token, placeId, reviewText, rating) {
     try {
-        const response = await fetch(`http://localhost:5001/api/v1/places/${placeId}/reviews`, {
+        const response = await fetch(`http://localhost:5000/api/v1/places/${placeId}/reviews`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
