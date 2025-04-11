@@ -73,34 +73,47 @@ h1 {
     margin-left: 0;
 }
 
-/* Places list styles */
-#places-list {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 20px;
+/* Places grid layout */
+.places-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 2rem;
+    padding: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
 }
 
 .place-card {
     background: white;
-    border: 1px solid #ddd;
-    border-radius: 10px;
-    padding: 20px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 1.5rem;
+    width: 300px;
+    text-align: center;
+    transition: transform 0.2s ease-in-out;
+}
+
+.place-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 
 .place-card h2 {
-    margin-bottom: 1rem;
     color: #333;
+    margin-bottom: 1rem;
+    font-size: 1.5rem;
 }
 
-.price {
-    color: #000000;
+.place-card .price {
+    color: #e1a6ad;
+    font-weight: bold;
+    font-size: 1.2rem;
     margin-bottom: 1rem;
 }
 
-.details-button {
-    display: inline-block;
-    background-color: #e1a6ad;
+.view-details {
+    background: #e1a6ad;
     color: white;
     padding: 0.5rem 1rem;
     border: 2px solid #e1a6ad;
