@@ -17,7 +17,7 @@ body {
 /* Header styles */
 header {
     background-color: #e1a6ad;
-    padding: 1rem;
+    padding: 0.3rem;
 }
 
 .header-content {
@@ -36,9 +36,9 @@ header {
 .login-button {
     color: #ffffff;
     text-decoration: none;
-    padding: 0.5rem 1rem;
+    padding: 0.4rem 0.9rem;
     border: 2px solid #ffffff;
-    border-radius: 5px;
+    border-radius: 3px;
     transition: all 0.3s ease;
 }
 
@@ -67,13 +67,29 @@ main {
 /* Filter section styles */
 #filter {
     margin-bottom: 2rem;
+    margin-top: 2.5rem;
+    padding: 1rem 0;
+}
+
+#filter label {
+    margin-right: 0.8rem;
+    font-size: 1.1rem;
+    color: #333;
 }
 
 #filter select {
-    padding: 0.5rem;
+    padding: 0.5rem 1rem;
     border: 1px solid #ddd;
-    border-radius: 3px;
-    margin-left: 0;
+    border-radius: 4px;
+    background-color: #fff;
+    font-size: 1rem;
+    cursor: pointer;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+#filter select:focus {
+    border-color: #e1a6ad;
+    outline: none;
 }
 
 /* Places list styles */
@@ -86,10 +102,10 @@ main {
 
 .place-card {
     background: white;
-    margin: 20px;
+    margin: 10px;
     border: 1px solid #ddd;
     border-radius: 10px;
-    padding: 20px;
+    padding: 10px;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
     text-align: center;
 }
