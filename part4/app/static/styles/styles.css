@@ -194,7 +194,7 @@ main {
 .reviews-container {
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
+    gap: 1rem;
 }
 
 /* Review cards */
@@ -325,6 +325,16 @@ main {
     max-width: 800px;
     margin: 0 auto;
     padding: 2rem;
+}
+
+.review-container h1 {
+    margin-bottom: 2rem;
+}
+
+.review-container h2 {
+    margin-bottom: 0.7rem;
+    text-align: left;
+    margin-left: 1rem;
 }
 
 .review-form {
