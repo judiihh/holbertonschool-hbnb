@@ -123,6 +123,54 @@ document.addEventListener('DOMContentLoaded', () => {
     if (priceFilter) {
         priceFilter.addEventListener('change', handlePriceFilter);
     }
+
+    // Initialize place details if we're on the place details page
+    if (document.querySelector('.place-details')) {
+        initializePlaceDetails();
+    }
+
+    // Handle review form submission
+    const reviewForm = document.getElementById('review-form');
+    if (reviewForm) {
+        reviewForm.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            
+            const token = getCookie('token');
+            if (!token) {
+                showError('Please log in to submit a review.');
+                return;
+            }
+
+            const placeId = getPlaceIdFromURL();
+            const reviewText = document.getElementById('review').value;
+            const rating = document.getElementById('rating').value;
+
+            try {
+                const response = await fetch(`http://localhost:5001/api/v1/places/${placeId}/reviews`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        text: reviewText,
+                        rating: parseInt(rating)
+                    })
+                });
+
+                if (response.ok) {
+                    // Refresh the page to show the new review
+                    window.location.reload();
+                } else {
+                    const errorData = await response.json();
+                    showError(errorData.message || 'Failed to submit review. Please try again.');
+                }
+            } catch (error) {
+                console.error('Error submitting review:', error);
+                showError('An error occurred while submitting your review.');
+            }
+        });
+    }
 });
 
 async function loginUser(email, password) {
@@ -251,4 +299,106 @@ function handlePriceFilter(event) {
             card.style.display = 'none';
         }
     });
+}
+
+// Get place ID from URL
+function getPlaceIdFromURL() {
+    const urlParams = new URLSearchParams(window.location.search);
+    return urlParams.get('id');
+}
+
+// Initialize place details page
+async function initializePlaceDetails() {
+    const placeId = getPlaceIdFromURL();
+    const token = getCookie('token');
+    const addReviewSection = document.querySelector('.review-form');
+
+    if (addReviewSection) {
+        if (!token) {
+            addReviewSection.style.display = 'none';
+        } else {
+            addReviewSection.style.display = 'block';
+        }
+    }
+
+    if (placeId) {
+        await fetchPlaceDetails(token, placeId);
+    }
+}
+
+// Fetch place details from API
+async function fetchPlaceDetails(token, placeId) {
+    try {
+        const headers = {
+            'Content-Type': 'application/json'
+        };
+        if (token) {
+            headers['Authorization'] = `Bearer ${token}`;
+        }
+
+        const response = await fetch(`http://localhost:5001/api/v1/places/${placeId}`, {
+            method: 'GET',
+            headers: headers
+        });
+
+        if (response.ok) {
+            const placeData = await response.json();
+            displayPlaceDetails(placeData);
+        } else {
+            console.error('Failed to fetch place details:', response.statusText);
+            showError('Failed to load place details. Please try again later.');
+        }
+    } catch (error) {
+        console.error('Error fetching place details:', error);
+        showError('An error occurred while loading place details.');
+    }
+}
+
+// Display place details in the DOM
+function displayPlaceDetails(place) {
+    // Update place name in h1
+    const placeTitle = document.querySelector('h1');
+    if (placeTitle) {
+        placeTitle.textContent = place.name;
+    }
+
+    // Update place details section
+    const placeDetails = document.querySelector('.place-details');
+    if (placeDetails) {
+        const detailsHTML = `
+            <div class="place-info">
+                <p><strong>Location:</strong> ${place.location}</p>
+                <p><strong>Description:</strong> ${place.description}</p>
+                <p><strong>Price per night:</strong> $${place.price_per_night}</p>
+                <p><strong>Max guests:</strong> ${place.max_guests}</p>
+                <p><strong>Rooms:</strong> ${place.rooms}</p>
+                <p><strong>Bathrooms:</strong> ${place.bathrooms}</p>
+            </div>
+            <div class="amenities">
+                <h2>Amenities</h2>
+                <ul>
+                    ${place.amenities.map(amenity => `<li>${amenity}</li>`).join('')}
+                </ul>
+            </div>
+        `;
+        placeDetails.innerHTML = detailsHTML;
+    }
+
+    // Update reviews section
+    const reviewsSection = document.querySelector('.reviews-section');
+    if (reviewsSection && place.reviews) {
+        const reviewsHTML = `
+            <h2>Reviews</h2>
+            ${place.reviews.map(review => `
+                <div class="review-card">
+                    <h3>${review.user_name}</h3>
+                    <p>${review.text}</p>
+                    <div class="rating" aria-label="${review.rating} out of 5 stars">
+                        <strong>Rating:</strong> ${'★'.repeat(review.rating)}${'☆'.repeat(5-review.rating)}
+                    </div>
+                </div>
+            `).join('')}
+        `;
+        reviewsSection.innerHTML = reviewsHTML;
+    }
 } 
