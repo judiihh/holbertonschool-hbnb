@@ -503,7 +503,7 @@ function displayPlaceDetails(place) {
     // Add place details
     placeInfo.innerHTML = `
         <p><strong>Host:</strong> ${place.owner_name || 'Unknown'}</p>
-        <p><strong>Price:</strong> $${place.price_by_night || place.price_per_night || 0} per night</p>
+        <p><strong>Price per night:</strong> $${place.price_by_night || place.price_per_night || 0}</p>
         <p><strong>Location:</strong> ${place.city || ''}</p>
         <p><strong>Since:</strong> ${formatDate(place.created_at)}</p>
         <p><strong>Description:</strong> ${place.description || 'No description available'}</p>
@@ -607,10 +607,16 @@ function displayReviews(reviews) {
     const reviewsSection = document.getElementById('reviews');
     if (!reviewsSection) return;
     
+    // Clear previous content but add the heading
     reviewsSection.innerHTML = '<h2>Reviews</h2>';
     
     if (!reviews || reviews.length === 0) {
-        reviewsSection.innerHTML += '<p>No reviews yet.</p>';
+        const noReviews = document.createElement('p');
+        noReviews.textContent = 'No reviews yet.';
+        noReviews.style.textAlign = 'left';
+        noReviews.style.marginLeft = '20px';
+        noReviews.style.marginBottom = '20px';
+        reviewsSection.appendChild(noReviews);
         return;
     }
     
@@ -628,6 +634,10 @@ function displayReviews(reviews) {
         rating: ratingProperty,
         createdAt: createdAtProperty
     });
+    
+    // Create a container for all review cards
+    const reviewsContainer = document.createElement('div');
+    reviewsContainer.className = 'reviews-container';
     
     // Create review cards
     reviews.forEach(async (review, index) => {
@@ -668,11 +678,11 @@ function displayReviews(reviews) {
         reviewCard.innerHTML = `
             <h3>${userName}</h3>
             <p class="review-date">${formattedDate || ''}</p>
-            <p>${text}</p>
-            <div class="rating ${ratingColorClass}">${'★'.repeat(rating)}${'☆'.repeat(5 - rating)}</div>
+            <p class="review-text">${text}</p>
+            <div class="rating"><strong>Rating:</strong> <span class="${ratingColorClass}">${'★'.repeat(rating)}${'☆'.repeat(5 - rating)}</span></div>
         `;
         
-        reviewsSection.appendChild(reviewCard);
+        reviewsContainer.appendChild(reviewCard);
         
         // If we have a userId, try to fetch the user's name
         if (userId) {
@@ -694,8 +704,8 @@ function displayReviews(reviews) {
                 else if (data.user) userData = data.user;
                 
                 // Extract username from user data
-                const nameProperty = findPropertyByPriority(userData, ['name', 'first_name', 'username', 'email']);
-                userName = userData[nameProperty] || 'Anonymous';
+                const nameProperty = findPropertyByPriority(userData, ['name', 'first_name', 'username', 'email', 'login']);
+                userName = userData[nameProperty] || 'User';
                 
                 // Update the username in the review card
                 const usernameElement = document.querySelector(`#review-${index} h3`);
@@ -710,17 +720,13 @@ function displayReviews(reviews) {
         }
     });
     
-    // Add CSS for rating colors
-    if (!document.getElementById('rating-styles')) {
-        const style = document.createElement('style');
-        style.id = 'rating-styles';
-        style.textContent = `
-            .rating-high { color: #28a745; }
-            .rating-medium { color: #ffc107; }
-            .rating-low { color: #dc3545; }
-            .review-date { color: #6c757d; font-size: 0.9em; margin-top: -0.5em; }
-        `;
-        document.head.appendChild(style);
+    // Add the reviews container to the section
+    reviewsSection.appendChild(reviewsContainer);
+    
+    // We don't need to add inline styles anymore since we've updated the CSS
+    // If you want to make sure the CSS is applied, we can simply use a class
+    if (!document.body.classList.contains('reviews-styled')) {
+        document.body.classList.add('reviews-styled');
     }
 }
 

@@ -56,11 +56,12 @@ main {
     width: 100%;
 }
 
-h1 {
+.main-title {
     font-size: 2rem;
     text-align: center;
-    margin-bottom: 1.5rem;
+    margin-bottom: 2rem;
     color: #333;
+    padding: 20px;
 }
 
 /* Filter section styles */
@@ -174,29 +175,73 @@ h1 {
     color: #333;
 }
 
-/* Reviews section styles */
-.reviews-section {
-    margin-top: 2rem;
+/* Reviews heading style */
+#reviews h2 {
+    font-size: 1.5rem;
+    text-align: left;
+    margin: 2rem 0 1rem 20px;
+    color: #333;
+    padding: 0;
+    font-weight: bold;
 }
 
+/* Reviews section layout */
+.reviews-section {
+    margin-top: 1rem;
+}
+
+/* Reviews container */
+.reviews-container {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+/* Review cards */
 .review-card {
     background: white;
     margin: 20px;
+    padding: 15px;
     border: 1px solid #ddd;
     border-radius: 10px;
-    padding: 10px;
-    margin-bottom: 1rem;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
 .review-card h3 {
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.3rem;
     color: #333;
+    font-size: 1.1rem;
+}
+
+.review-date {
+    color: #6c757d;
+    font-size: 0.9em;
+    margin-bottom: 0.8rem;
+}
+
+.review-text {
+    margin-bottom: 0.8rem;
 }
 
 .rating {
-    color: #e1a6ad;
     margin-top: 0.5rem;
+    color: #333;
+}
+
+.rating strong {
+    margin-right: 0.3rem;
+}
+
+.rating-high {
+    color: #e1a6ad;
+}
+
+.rating-medium {
+    color: #e1a6ad;
+}
+
+.rating-low {
+    color: #e1a6ad;
 }
 
 .add-review-button {
