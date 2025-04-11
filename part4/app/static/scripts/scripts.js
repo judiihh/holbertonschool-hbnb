@@ -649,6 +649,17 @@ function displayReviews(reviews) {
         return;
     }
     
+    // Initialize or get the usernames cache from localStorage
+    let userNamesCache = {};
+    try {
+        const cachedData = localStorage.getItem('hbnb_usernames_cache');
+        if (cachedData) {
+            userNamesCache = JSON.parse(cachedData);
+        }
+    } catch (error) {
+        console.error('Error accessing localStorage:', error);
+    }
+    
     // Determine which property names to use by examining the first review
     const firstReview = reviews[0];
     
@@ -678,6 +689,7 @@ function displayReviews(reviews) {
         const reviewCard = document.createElement('div');
         reviewCard.className = 'review-card';
         reviewCard.id = `review-${index}`;
+        reviewCard.setAttribute('data-user-id', userId);
         
         // Determine color class based on rating
         let ratingColorClass = '';
@@ -700,8 +712,8 @@ function displayReviews(reviews) {
             });
         }
         
-        // Initially set default username
-        let userName = 'Anonymous User';
+        // Check for cached username first
+        let userName = userNamesCache[userId] || 'Anonymous User';
         
         // Check if this is the admin user's review
         const currentUserId = getUserIdFromToken();
@@ -720,7 +732,7 @@ function displayReviews(reviews) {
         reviewsContainer.appendChild(reviewCard);
         
         // If we have a userId and it's not the admin, try to fetch the user's name
-        if (userId && !(isAdminUser() && userId === currentUserId)) {
+        if (userId && !(isAdminUser() && userId === currentUserId) && !userNamesCache[userId]) {
             const token = getToken();
             
             fetch(`${USERS_URL}/${userId}`, {
@@ -761,14 +773,17 @@ function displayReviews(reviews) {
                 if (usernameElement) {
                     usernameElement.textContent = `${fullName}:`;
                 }
+                
+                // Cache the username
+                userNamesCache[userId] = fullName;
+                try {
+                    localStorage.setItem('hbnb_usernames_cache', JSON.stringify(userNamesCache));
+                } catch (error) {
+                    console.error('Error saving to localStorage:', error);
+                }
             })
             .catch(error => {
                 console.error(`Error fetching user data for review ${index}:`, error);
-                // Use a better default if we can't fetch the username
-                const usernameElement = document.querySelector(`#review-${index} h3`);
-                if (usernameElement) {
-                    usernameElement.textContent = 'Anonymous User:';
-                }
             });
         }
     });
