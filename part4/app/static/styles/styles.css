@@ -90,9 +90,10 @@ h1 {
     text-align: center;
 }
 
-.place-card h2 {
+.place-card h1 {
     margin-bottom: 1rem;
     color: #333;
+    text-align: center;
 }
 
 .price {
