@@ -61,7 +61,14 @@ htmlcov/
 .DS_Store
 Thumbs.db
 
-# Don't ignore these directories
+# Track these directories but ignore their __pycache__ folders
+app/**/__pycache__/
+tests/**/__pycache__/
+
+# Track these specific files and directories
 !app/
 !tests/
 !README.md
+!requirements.txt
+!config.py
+!run.py
