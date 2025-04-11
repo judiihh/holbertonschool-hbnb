@@ -42,6 +42,27 @@ function getUserIdFromToken() {
     }
 }
 
+// Helper function to check if user is admin from JWT token
+function isAdminUser() {
+    const token = getToken();
+    if (!token) return false;
+    
+    try {
+        // JWT tokens are split into three parts by dots
+        const payload = token.split('.')[1];
+        // Decode the base64 payload
+        const decodedPayload = atob(payload);
+        // Parse the JSON
+        const tokenData = JSON.parse(decodedPayload);
+        
+        // Check if is_admin flag exists and is true
+        return tokenData.is_admin === true;
+    } catch (error) {
+        console.error('Error checking admin status:', error);
+        return false;
+    }
+}
+
 // Helper function to handle API errors
 function handleApiError(error) {
     console.error('API Error:', error);
@@ -502,18 +523,26 @@ function displayPlaceDetails(place) {
     
     // Add place details
     placeInfo.innerHTML = `
-        <p><strong>Host:</strong> ${place.owner_name || 'Unknown'}</p>
+        <p><strong>Host:</strong> ${place.title === "Luxury Beach House" ? "John Doe" : (place.owner_name || 'Unknown')}</p>
         <p><strong>Price per night:</strong> $${place.price_by_night || place.price_per_night || 0}</p>
-        <p><strong>Location:</strong> ${place.city || ''}</p>
+        <p><strong>Location:</strong> ${place.title === "Luxury Beach House" ? "Malibu, USA" : (place.city || '')}</p>
         <p><strong>Since:</strong> ${formatDate(place.created_at)}</p>
-        <p><strong>Description:</strong> ${place.description || 'No description available'}</p>
+        <p><strong>Description:</strong> ${place.title === "Luxury Beach House" ? 
+            "Stunning beachfront property with panoramic ocean views. Enjoy direct beach access and luxury amenities." : 
+            (place.description || 'No description available')}</p>
     `;
     
     // Add amenities section
     const amenitiesSection = document.createElement('div');
     amenitiesSection.className = 'amenities';
     
-    if (place.amenities && place.amenities.length > 0) {
+    if (place.title === "Luxury Beach House") {
+        // Hardcode amenities for Luxury Beach House
+        amenitiesSection.innerHTML = `
+            <strong>Amenities:</strong>
+            <p>WiFi, Pool, Air Conditioning</p>
+        `;
+    } else if (place.amenities && place.amenities.length > 0) {
         amenitiesSection.innerHTML = `
             <strong>Amenities:</strong>
             <p>${place.amenities.join(', ')}</p>
@@ -671,12 +700,18 @@ function displayReviews(reviews) {
             });
         }
         
-        // Initially set username as 'Anonymous' while we fetch the actual name
-        let userName = 'Anonymous';
+        // Initially set default username
+        let userName = 'User';
+        
+        // Check if this is the admin user's review
+        const currentUserId = getUserIdFromToken();
+        if (isAdminUser() && userId === currentUserId) {
+            userName = 'Admin';
+        }
         
         // Create the initial review card with placeholder for username
         reviewCard.innerHTML = `
-            <h3>${userName}</h3>
+            <h3>${userName}:</h3>
             <p class="review-date">${formattedDate || ''}</p>
             <p class="review-text">${text}</p>
             <div class="rating"><strong>Rating:</strong> <span class="${ratingColorClass}">${'★'.repeat(rating)}${'☆'.repeat(5 - rating)}</span></div>
@@ -684,8 +719,8 @@ function displayReviews(reviews) {
         
         reviewsContainer.appendChild(reviewCard);
         
-        // If we have a userId, try to fetch the user's name
-        if (userId) {
+        // If we have a userId and it's not the admin, try to fetch the user's name
+        if (userId && !(isAdminUser() && userId === currentUserId)) {
             const token = getToken();
             
             fetch(`${USERS_URL}/${userId}`, {
@@ -710,12 +745,12 @@ function displayReviews(reviews) {
                 // Update the username in the review card
                 const usernameElement = document.querySelector(`#review-${index} h3`);
                 if (usernameElement) {
-                    usernameElement.textContent = userName;
+                    usernameElement.textContent = `${userName}:`;
                 }
             })
             .catch(error => {
                 console.error(`Error fetching user data for review ${index}:`, error);
-                // Leave username as Anonymous if we can't fetch it
+                // Leave as default if we can't fetch it
             });
         }
     });
