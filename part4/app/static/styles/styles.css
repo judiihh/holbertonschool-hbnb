@@ -124,22 +124,22 @@ h1 {
     background: white;
     margin: 20px;
     border-radius: 10px;
-    padding: 10px;
+    padding: 10px 20px;
     border: 1px solid #ddd;
-    margin-bottom: 2rem;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
     text-align: center;
 }
 
 /* Remove title from white box */
 .place-details h1 {
-    display: inline;
+    display: none;
 }
 
 .place-info p {
     margin-bottom: 1rem;
     font-size: 1rem;
     display: flex;
+    line-height: 1.5;
     justify-content: center;
     align-items: center;
     gap: 5px;
@@ -147,6 +147,8 @@ h1 {
 
 .amenities {
     display: flex;
+    font-size: 1rem;
+    margin-bottom: 1rem;
     justify-content: center;
     align-items: center;
     gap: 5px;
@@ -165,7 +167,9 @@ h1 {
 }
 
 /* For the "Amenities text */
-.amenities span {
+.amenities p {
+    font-size: 1rem;
+    margin: 0;
     display: inline;
     color: #333;
 }
