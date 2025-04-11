@@ -109,7 +109,8 @@ h1 {
 }
 
 .details-button:hover {
-    background-color: #e1a6ad;
+    background-color: #ffffff;
+    color: #e1a6ad;
 }
 
 /* Place details styles */
