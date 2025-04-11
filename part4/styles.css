@@ -103,6 +103,7 @@ h1 {
     background-color: #e1a6ad;
     color: white;
     padding: 0.5rem 1rem;
+    border: 2px solid #e1a6ad;
     text-decoration: none;
     border-radius: 5px;
     transition: background-color 0.3s ease;
@@ -172,6 +173,7 @@ h1 {
     background-color: #e1a6ad;
     color: white;
     padding: 0.5rem 1rem;
+    border: 2px solid #e1a6ad;
     text-decoration: none;
     border-radius: 5px;
     margin-top: 1rem;
