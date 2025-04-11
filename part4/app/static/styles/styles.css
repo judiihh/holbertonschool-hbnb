@@ -135,20 +135,30 @@ h1 {
 
 .place-info p {
     margin-bottom: 1rem;
-    font-size: 1.1rem;
+    font-size: 1rem;
 }
 
 .amenities {
     margin-top: 1rem;
+    text-align: center;
 }
 
 .amenities ul {
     list-style: none;
     margin-top: 0.5rem;
+    padding: 0;
+    display: inline-block;
+    text-align: center;
 }
 
 .amenities li {
     margin-bottom: 0.5rem;
+}
+
+/* For the "Amenities text */
+.amenities p {
+    margin-bottom: 0.5rem;
+    color: #333;
 }
 
 /* Reviews section styles */
