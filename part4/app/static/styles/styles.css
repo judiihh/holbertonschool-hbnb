@@ -131,11 +131,6 @@ h1 {
     text-align: center;
 }
 
-.place-info strong, .amenities strong {
-    font-weight: bold;
-    font-size: 1rem;
-}
-
 /* Remove title from white box */
 .place-details h1 {
     display: inline;
