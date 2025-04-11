@@ -58,13 +58,19 @@ document.addEventListener('DOMContentLoaded', function() {
     // Update login/logout button
     updateAuthButton();
     
+    console.log('Current path:', path);
+    
     if (path === '/' || path === '/index') {
         loadPlaces();
     } else if (path.includes('/place/')) {
-        const placeId = path.split('/').pop();
+        const pathParts = path.split('/');
+        const placeId = pathParts[pathParts.length - 1];
+        console.log('Loading place details for ID:', placeId);
         loadPlaceDetails(placeId);
     } else if (path.includes('/add_review/')) {
-        const placeId = path.split('/').pop();
+        const pathParts = path.split('/');
+        const placeId = pathParts[pathParts.length - 1];
+        console.log('Setting up add review for place ID:', placeId);
         setupAddReviewPage(placeId);
     } else if (path === '/login') {
         setupLoginForm();
@@ -92,6 +98,11 @@ function updateAuthButton() {
 
 // Load all places for the main page
 function loadPlaces() {
+    const placesList = document.getElementById('places-list');
+    if (placesList) {
+        placesList.innerHTML = '<p>Loading places...</p>';
+    }
+    
     const headers = {
         'Content-Type': 'application/json'
     };
@@ -102,17 +113,33 @@ function loadPlaces() {
         headers['Authorization'] = `Bearer ${token}`;
     }
     
+    console.log('Fetching places from API:', PLACES_URL);
+    
     fetch(PLACES_URL, {
         method: 'GET',
         headers: headers
     })
     .then(response => {
-        if (!response.ok) throw response;
+        console.log('Places API response status:', response.status);
+        if (!response.ok) {
+            throw { 
+                status: response.status, 
+                statusText: response.statusText 
+            };
+        }
         return response.json();
     })
     .then(data => {
         // Log the full response to see its structure
         console.log('API Response:', data);
+        
+        // Check if the data is empty or null
+        if (!data) {
+            if (placesList) {
+                placesList.innerHTML = '<p>No places available at this time.</p>';
+            }
+            return;
+        }
         
         // Check if the data is nested inside another object
         let places = data;
@@ -136,17 +163,53 @@ function loadPlaces() {
         if (places.length > 0) {
             console.log('First place object:', places[0]);
             console.log('Available properties:', Object.keys(places[0]));
+        } else {
+            console.log('No places found in API response');
+            if (placesList) {
+                placesList.innerHTML = '<p>No places available at this time.</p>';
+            }
+            return;
         }
         
         displayPlaces(places);
         setupPriceFilter(places);
     })
-    .catch(handleApiError);
+    .catch(error => {
+        console.error('Error loading places:', error);
+        
+        if (placesList) {
+            let errorMessage = 'Error loading places. Please try again later.';
+            
+            if (error.status) {
+                errorMessage = `Server returned error code: ${error.status}`;
+                if (error.statusText) {
+                    errorMessage += ` (${error.statusText})`;
+                }
+            }
+            
+            placesList.innerHTML = `
+                <div class="error-message" style="margin: 20px auto; max-width: 800px;">
+                    <h2>Error Loading Places</h2>
+                    <p>${errorMessage}</p>
+                    <button onclick="window.location.reload()" class="details-button" style="display: inline-block; margin-top: 15px; cursor: pointer;">Try Again</button>
+                </div>
+            `;
+        }
+        
+        if (error.status === 401) {
+            handleApiError(error);
+        }
+    });
 }
 
 // Display places in the places-list section
 function displayPlaces(places) {
     const placesList = document.getElementById('places-list');
+    if (!placesList) {
+        console.error('Places list element not found');
+        return;
+    }
+    
     placesList.innerHTML = '';
     
     if (!places || places.length === 0) {
@@ -186,13 +249,19 @@ function displayPlaces(places) {
         }
         
         const id = place[idProperty] || '';
+        if (!id) {
+            console.warn('Place has no ID, skipping:', place);
+            return; // Skip this place
+        }
+        
+        console.log(`Creating place card - Name: ${name}, Price: ${price}, ID: ${id}`);
         
         const placeCard = document.createElement('div');
         placeCard.className = 'place-card';
         placeCard.innerHTML = `
             <h2>${name}</h2>
             <p class="price">$${price} per night</p>
-            <a href="/place/${id}" class="details-button">View Details</a>
+            <a href="/place/${encodeURIComponent(id)}" class="details-button">View Details</a>
         `;
         placesList.appendChild(placeCard);
     });
@@ -247,6 +316,14 @@ function setupPriceFilter(allPlaces) {
 
 // Load details for a specific place
 function loadPlaceDetails(placeId) {
+    console.log('Fetching place details for ID:', placeId);
+    
+    if (!placeId || placeId === 'undefined' || placeId === 'null') {
+        console.error('Invalid place ID:', placeId);
+        showPlaceLoadError('Invalid place ID');
+        return;
+    }
+    
     const headers = {
         'Content-Type': 'application/json'
     };
@@ -257,17 +334,50 @@ function loadPlaceDetails(placeId) {
         headers['Authorization'] = `Bearer ${token}`;
     }
     
-    fetch(`${PLACES_URL}/${placeId}`, {
+    // Ensure placeId is properly formatted and encoded
+    const cleanPlaceId = placeId.trim();
+    const url = `${PLACES_URL}/${encodeURIComponent(cleanPlaceId)}`;
+    console.log('Fetching from URL:', url);
+    
+    // Check if API is reachable
+    fetch(`${API_URL}/places`, { 
         method: 'GET',
-        headers: headers
+        headers: headers 
     })
     .then(response => {
-        if (!response.ok) throw response;
+        console.log('API check response:', response.status);
+        if (!response.ok) {
+            console.warn('API check failed, but continuing with place fetch');
+        }
+        
+        // Now fetch the specific place
+        return fetch(url, {
+            method: 'GET',
+            headers: headers
+        });
+    })
+    .then(response => {
+        console.log('Place details response status:', response.status);
+        if (!response.ok) {
+            throw { 
+                status: response.status, 
+                statusText: response.statusText,
+                message: `API returned ${response.status} status`
+            };
+        }
         return response.json();
     })
     .then(data => {
         // Log the response to see its structure
         console.log('Place details response:', data);
+        
+        // Check if the data is empty or null
+        if (!data) {
+            throw { 
+                status: 404, 
+                message: 'API returned empty data' 
+            };
+        }
         
         // Check if the place data is nested
         let place = data;
@@ -283,6 +393,11 @@ function loadPlaceDetails(placeId) {
             console.log('Using data.result for place details');
         }
         
+        // Make sure place has an ID
+        if (!place.id && placeId) {
+            place.id = placeId;
+        }
+        
         // Log available properties
         console.log('Place details properties:', Object.keys(place));
         
@@ -292,105 +407,139 @@ function loadPlaceDetails(placeId) {
     })
     .catch(error => {
         console.error('Error fetching place details:', error);
-        const placeDetails = document.getElementById('place-details');
-        if (placeDetails) {
-            placeDetails.innerHTML = `
-                <div class="error-message">
-                    <h2>Error loading place details</h2>
-                    <p>The requested place could not be found or there was an error loading the details.</p>
-                    <a href="/" class="details-button">Return to home page</a>
-                </div>
-            `;
+        let errorMessage = 'Could not fetch place details';
+        
+        if (error.message) {
+            errorMessage = error.message;
+        } else if (error.status) {
+            errorMessage = `Server returned error code: ${error.status}`;
+            if (error.statusText) {
+                errorMessage += ` (${error.statusText})`;
+            }
         }
-        handleApiError(error);
+        
+        showPlaceLoadError(errorMessage);
+        
+        if (error.status === 401) {
+            handleApiError(error);
+        }
     });
 }
 
-// Display place details
-function displayPlaceDetails(place) {
-    const placeDetails = document.getElementById('place-details');
-    if (!placeDetails) return;
-    
-    // Log the complete place object to see all available properties and values
-    console.log('Complete place object:', place);
-    
-    // Determine which property names to use
-    const nameProperty = findPropertyByPriority(place, ['name', 'title', 'place_name']);
-    const hostProperty = findPropertyByPriority(place, ['host_name', 'host', 'owner']);
-    const priceProperty = findPropertyByPriority(place, ['price_per_night', 'price_by_night', 'price', 'nightly_price', 'rate']);
-    const cityProperty = findPropertyByPriority(place, ['city', 'location_city', 'address_city']);
-    const countryProperty = findPropertyByPriority(place, ['country', 'location_country', 'address_country']);
-    const descriptionProperty = findPropertyByPriority(place, ['description', 'desc', 'about']);
-    const amenitiesProperty = findPropertyByPriority(place, ['amenities', 'facilities', 'features']);
-    const imageProperty = findPropertyByPriority(place, ['image_url', 'image', 'photo', 'picture_url']);
-    const createdAtProperty = findPropertyByPriority(place, ['created_at', 'createdAt', 'creation_date']);
-    
-    console.log('Using place detail properties:', {
-        name: nameProperty,
-        host: hostProperty,
-        price: priceProperty,
-        city: cityProperty,
-        country: countryProperty,
-        desc: descriptionProperty,
-        amenities: amenitiesProperty,
-        image: imageProperty,
-        createdAt: createdAtProperty
-    });
-    
-    // Get values using detected property names
-    const name = place[nameProperty] || 'Unnamed Place';
-    const hostName = place[hostProperty] || 'Unknown';
-    
-    // Get price - explicitly check for price_by_night since this seems to be what the API is using
-    let price = 0;
-    if (place.price_by_night) {
-        price = place.price_by_night;
-    } else if (place[priceProperty]) {
-        price = place[priceProperty];
+// Function to show place load error
+function showPlaceLoadError(message) {
+    // Set the title to indicate error
+    const titleElement = document.getElementById('place-title');
+    if (titleElement) {
+        titleElement.textContent = 'Error Loading Place';
     }
     
-    const city = place[cityProperty] || '';
-    const country = place[countryProperty] || '';
-    const description = place[descriptionProperty] || 'No description available';
-    const amenities = place[amenitiesProperty] || [];
-    const imageUrl = place[imageProperty] || '';
+    // Display error in the place details section
+    const placeDetails = document.getElementById('place-details');
+    if (placeDetails) {
+        placeDetails.innerHTML = `
+            <div class="error-message">
+                <h2>Error loading place details</h2>
+                <p>The requested place could not be found or there was an error loading the details.</p>
+                <p class="error-details">${message}</p>
+                <a href="/" class="details-button" style="display: inline-block; margin-top: 15px;">Return to home page</a>
+            </div>
+        `;
+    }
     
-    // Format created_at date if available
-    let formattedDate = '';
-    if (place[createdAtProperty]) {
-        const date = new Date(place[createdAtProperty]);
-        formattedDate = date.toLocaleDateString('en-US', {
+    // Clear the reviews section
+    const reviewsSection = document.getElementById('reviews');
+    if (reviewsSection) {
+        reviewsSection.innerHTML = '';
+    }
+    
+    // Hide the add review button
+    const addReviewButton = document.querySelector('.add-review-button');
+    if (addReviewButton) {
+        addReviewButton.style.display = 'none';
+    }
+}
+
+// Helper function to format dates
+function formatDate(dateString) {
+    if (!dateString) return 'Not specified';
+    
+    try {
+        const date = new Date(dateString);
+        return date.toLocaleDateString('en-US', {
             year: 'numeric',
             month: 'long',
             day: 'numeric'
         });
+    } catch (error) {
+        console.error('Error formatting date:', error);
+        return 'Invalid date';
+    }
+}
+
+// Display place details
+function displayPlaceDetails(place) {
+    // Find the title property
+    const titleProperty = findPropertyByPriority(place, ['name', 'title', 'place_name']);
+    const title = place[titleProperty] || 'Unnamed Place';
+    
+    // Set the page title
+    document.title = `${title} - HBnB`;
+    
+    // Set the main heading
+    const titleElement = document.getElementById('place-title');
+    if (titleElement) {
+        titleElement.textContent = title;
     }
     
-    // Display image if available
-    const imageHtml = imageUrl 
-        ? `<img src="${imageUrl}" alt="${name}" class="place-image">`
-        : '';
+    // Get the place details section
+    const placeDetails = document.getElementById('place-details');
+    if (!placeDetails) return;
     
-    placeDetails.innerHTML = `
-        <h1>${name}</h1>
-        ${imageHtml}
-        <div class="place-info">
-            <p><strong>Host:</strong> ${hostName}</p>
-            <p><strong>Price:</strong> $${price} per night</p>
-            <p><strong>Location:</strong> ${city}${city && country ? ', ' : ''}${country}</p>
-            <p><strong>Since:</strong> ${formattedDate || 'Not specified'}</p>
-            <p><strong>Description:</strong> ${description}</p>
-            
-            <div class="amenities">
-                <h3>Amenities:</h3>
-                <ul>
-                    ${Array.isArray(amenities) && amenities.length 
-                        ? amenities.map(amenity => `<li>${amenity}</li>`).join('') 
-                        : '<li>No amenities listed</li>'}
-                </ul>
-            </div>
-        </div>
+    // Create the place info HTML
+    const placeInfo = document.createElement('div');
+    placeInfo.className = 'place-info';
+    
+    // Add place details
+    placeInfo.innerHTML = `
+        <p><strong>Host:</strong> ${place.owner_name || 'Unknown'}</p>
+        <p><strong>Price:</strong> $${place.price_by_night || place.price_per_night || 0} per night</p>
+        <p><strong>Location:</strong> ${place.city || ''}</p>
+        <p><strong>Since:</strong> ${formatDate(place.created_at)}</p>
+        <p><strong>Description:</strong> ${place.description || 'No description available'}</p>
     `;
+    
+    // Add amenities section
+    const amenitiesSection = document.createElement('div');
+    amenitiesSection.className = 'amenities';
+    
+    if (place.amenities && place.amenities.length > 0) {
+        amenitiesSection.innerHTML = `
+            <strong>Amenities:</strong>
+            <p>${place.amenities.join(', ')}</p>
+        `;
+    } else {
+        amenitiesSection.innerHTML = `
+            <strong>Amenities:</strong>
+            <p>No amenities listed</p>
+        `;
+    }
+    
+    // Clear previous content and add new content
+    placeDetails.innerHTML = '';
+    placeDetails.appendChild(placeInfo);
+    placeDetails.appendChild(amenitiesSection);
+    
+    // Show the add review button if user is logged in
+    const addReviewButton = document.querySelector('.add-review-button');
+    if (addReviewButton) {
+        if (isLoggedIn()) {
+            addReviewButton.style.display = 'inline-block';
+            addReviewButton.href = `/add_review/${place.id}`;
+        } else {
+            addReviewButton.style.display = 'none';
+        }
+    }
 }
 
 // Load reviews for a place
