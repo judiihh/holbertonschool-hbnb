@@ -138,7 +138,7 @@ h1 {
 
 /* Remove title from white box */
 .place-details h1 {
-    display: none;
+    display: inline;
 }
 
 .place-info p {
@@ -171,7 +171,6 @@ h1 {
 
 /* For the "Amenities text */
 .amenities span {
-    font-size: 1rem;
     display: inline;
     color: #333;
 }
