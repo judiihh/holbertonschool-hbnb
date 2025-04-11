@@ -16,7 +16,7 @@ body {
 
 /* Header styles */
 header {
-    background-color: #f79d2f;
+    background-color: #d38fac;
     padding: 1rem;
 }
 
@@ -100,7 +100,7 @@ h1 {
 
 .details-button {
     display: inline-block;
-    background-color: #f79d2f;
+    background-color: #d38fac;
     color: white;
     padding: 0.5rem 1rem;
     text-decoration: none;
@@ -109,7 +109,7 @@ h1 {
 }
 
 .details-button:hover {
-    background-color: #f79d2f;
+    background-color: #d38fac;
 }
 
 /* Place details styles */
@@ -162,13 +162,13 @@ h1 {
 }
 
 .rating {
-    color: #f79d2f;
+    color: #d38fac;
     margin-top: 0.5rem;
 }
 
 .add-review-button {
     display: inline-block;
-    background-color: #f79d2f;
+    background-color: #d38fac;
     color: white;
     padding: 0.5rem 1rem;
     text-decoration: none;
@@ -178,7 +178,7 @@ h1 {
 }
 
 .add-review-button:hover {
-    background-color: #f79d2f;
+    background-color: #d38fac;
 }
 
 /* Login form styles */
@@ -222,7 +222,7 @@ h1 {
 }
 
 .submit-button {
-    background-color: #f79d2f;
+    background-color: #d38fac;
     color: white;
     padding: 0.5rem 1rem;
     border: none;
@@ -233,7 +233,7 @@ h1 {
 }
 
 .submit-button:hover {
-    background-color: #f79d2f;
+    background-color: #d38fac;
 }
 
 /* Review form styles */
