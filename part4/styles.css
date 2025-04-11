@@ -178,7 +178,8 @@ h1 {
 }
 
 .add-review-button:hover {
-    background-color: #e1a6ad;
+    background-color: #ffffff;
+    color: #e1a6ad;
 }
 
 /* Login form styles */
