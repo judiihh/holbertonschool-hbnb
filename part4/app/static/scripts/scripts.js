@@ -701,7 +701,7 @@ function displayReviews(reviews) {
         }
         
         // Initially set default username
-        let userName = 'User';
+        let userName = 'Anonymous User';
         
         // Check if this is the admin user's review
         const currentUserId = getUserIdFromToken();
@@ -738,19 +738,37 @@ function displayReviews(reviews) {
                 if (data.data) userData = data.data;
                 else if (data.user) userData = data.user;
                 
-                // Extract username from user data
-                const nameProperty = findPropertyByPriority(userData, ['name', 'first_name', 'username', 'email', 'login']);
-                userName = userData[nameProperty] || 'User';
+                // Check for first_name and last_name to create full name
+                let fullName = 'Anonymous User';
+                
+                // Try to get first name and last name
+                const firstNameProperty = findPropertyByPriority(userData, ['first_name', 'firstName']);
+                const lastNameProperty = findPropertyByPriority(userData, ['last_name', 'lastName']);
+                
+                if (userData[firstNameProperty] && userData[lastNameProperty]) {
+                    fullName = `${userData[firstNameProperty]} ${userData[lastNameProperty]}`;
+                } else {
+                    // Fallback to any name field we can find
+                    const nameProperty = findPropertyByPriority(userData, ['name', 'username', 'email', 'login']);
+                    fullName = userData[nameProperty] || 'Anonymous User';
+                }
+                
+                // Store the username in a data attribute to make it persist across page refreshes
+                reviewCard.setAttribute('data-username', fullName);
                 
                 // Update the username in the review card
                 const usernameElement = document.querySelector(`#review-${index} h3`);
                 if (usernameElement) {
-                    usernameElement.textContent = `${userName}:`;
+                    usernameElement.textContent = `${fullName}:`;
                 }
             })
             .catch(error => {
                 console.error(`Error fetching user data for review ${index}:`, error);
-                // Leave as default if we can't fetch it
+                // Use a better default if we can't fetch the username
+                const usernameElement = document.querySelector(`#review-${index} h3`);
+                if (usernameElement) {
+                    usernameElement.textContent = 'Anonymous User:';
+                }
             });
         }
     });
