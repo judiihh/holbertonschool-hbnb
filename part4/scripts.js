@@ -129,46 +129,35 @@ document.addEventListener('DOMContentLoaded', () => {
         initializePlaceDetails();
     }
 
+    // Initialize review form if we're on the add review page
+    if (document.querySelector('.review-form')) {
+        initializeReviewForm();
+    }
+
     // Handle review form submission
     const reviewForm = document.getElementById('review-form');
     if (reviewForm) {
         reviewForm.addEventListener('submit', async (event) => {
             event.preventDefault();
             
-            const token = getCookie('token');
-            if (!token) {
-                showError('Please log in to submit a review.');
+            const token = checkAuthenticationAndRedirect();
+            if (!token) return; // User will be redirected if not authenticated
+
+            const placeId = getPlaceIdFromURL();
+            if (!placeId) {
+                showError('No place specified for review.');
                 return;
             }
 
-            const placeId = getPlaceIdFromURL();
-            const reviewText = document.getElementById('review').value;
+            const reviewText = document.getElementById('review').value.trim();
             const rating = document.getElementById('rating').value;
 
-            try {
-                const response = await fetch(`http://localhost:5001/api/v1/places/${placeId}/reviews`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    },
-                    body: JSON.stringify({
-                        text: reviewText,
-                        rating: parseInt(rating)
-                    })
-                });
-
-                if (response.ok) {
-                    // Refresh the page to show the new review
-                    window.location.reload();
-                } else {
-                    const errorData = await response.json();
-                    showError(errorData.message || 'Failed to submit review. Please try again.');
-                }
-            } catch (error) {
-                console.error('Error submitting review:', error);
-                showError('An error occurred while submitting your review.');
+            if (!reviewText) {
+                showError('Please enter your review text.');
+                return;
             }
+
+            await submitReview(token, placeId, reviewText, rating);
         });
     }
 });
@@ -400,5 +389,116 @@ function displayPlaceDetails(place) {
             `).join('')}
         `;
         reviewsSection.innerHTML = reviewsHTML;
+    }
+}
+
+// Initialize review form page
+function initializeReviewForm() {
+    const token = checkAuthenticationAndRedirect();
+    if (!token) return; // User will be redirected if not authenticated
+
+    const placeId = getPlaceIdFromURL();
+    if (!placeId) {
+        showError('No place specified for review.');
+        window.location.href = 'index.html';
+        return;
+    }
+
+    // Fetch place details to show the place name
+    fetchPlaceNameForReview(token, placeId);
+}
+
+// Enhanced authentication check with redirect
+function checkAuthenticationAndRedirect() {
+    const token = getCookie('token');
+    if (!token) {
+        window.location.href = 'index.html';
+        return null;
+    }
+    return token;
+}
+
+// Fetch place name for the review form
+async function fetchPlaceNameForReview(token, placeId) {
+    try {
+        const headers = {
+            'Content-Type': 'application/json'
+        };
+        if (token) {
+            headers['Authorization'] = `Bearer ${token}`;
+        }
+
+        const response = await fetch(`http://localhost:5001/api/v1/places/${placeId}`, {
+            method: 'GET',
+            headers: headers
+        });
+
+        if (response.ok) {
+            const placeData = await response.json();
+            updateReviewFormTitle(placeData.name);
+        } else {
+            showError('Failed to load place information.');
+            setTimeout(() => {
+                window.location.href = 'index.html';
+            }, 2000);
+        }
+    } catch (error) {
+        console.error('Error fetching place details:', error);
+        showError('An error occurred while loading place information.');
+    }
+}
+
+// Update the review form title with place name
+function updateReviewFormTitle(placeName) {
+    const titleElement = document.querySelector('h1');
+    if (titleElement) {
+        titleElement.textContent = `Reviewing: ${placeName}`;
+    }
+}
+
+// Submit review to API
+async function submitReview(token, placeId, reviewText, rating) {
+    try {
+        const response = await fetch(`http://localhost:5001/api/v1/places/${placeId}/reviews`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({
+                text: reviewText,
+                rating: parseInt(rating)
+            })
+        });
+
+        if (response.ok) {
+            showSuccess('Review submitted successfully!');
+            // Clear the form
+            document.getElementById('review-form').reset();
+            // Redirect back to place details after a short delay
+            setTimeout(() => {
+                window.location.href = `place.html?id=${placeId}`;
+            }, 2000);
+        } else {
+            const errorData = await response.json();
+            showError(errorData.message || 'Failed to submit review. Please try again.');
+        }
+    } catch (error) {
+        console.error('Error submitting review:', error);
+        showError('An error occurred while submitting your review.');
+    }
+}
+
+// Show success message
+function showSuccess(message) {
+    const successDiv = document.createElement('div');
+    successDiv.className = 'success-message';
+    successDiv.style.color = 'green';
+    successDiv.style.marginBottom = '1rem';
+    successDiv.textContent = message;
+
+    const form = document.getElementById('review-form');
+    if (form) {
+        form.insertBefore(successDiv, form.firstChild);
     }
 } 
