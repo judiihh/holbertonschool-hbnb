@@ -1,7 +1,7 @@
-# 🏠 HBnB Project - Part 3
+# 🏠 HBnB Project - Part 4
 
 ## **📌 Project Overview**
-The **HBnB Evolution** project is an **Airbnb-like application** built with **Flask, SQLAlchemy, and JWT authentication**. This repository contains the **backend implementation for Part 3**, focusing on **user authentication, database integration, and API security**.
+The **HBnB Evolution** project is an **Airbnb-like application** built with **Flask, SQLAlchemy, and JWT authentication**. This repository contains the **completed implementation for Part 4**, focusing on **enhanced user experience, data relationships, and frontend integration**.
 
 ## **📂 Contents**
 This repository includes:
@@ -10,117 +10,56 @@ This repository includes:
 - ✅ **SQLAlchemy Database Integration**
 - ✅ **CRUD Operations with Persistent Storage**
 - ✅ **Mermaid.js ER Diagram for Database Visualization**
-- ✅ **SQL Scripts for Table Generation and Initial Data**
+- ✅ **Frontend Integration with Dynamic User Information**
+- ✅ **Host Information Display for Places**
+- ✅ **Review Management with User Names**
 
 ## **🛠️ Technologies Used**
 - **Python** 🐍 - Flask (REST API)
 - **SQLAlchemy** 🟤 - ORM for database management
 - **Flask-JWT-Extended** 🔒 - Authentication & security
 - **SQLite / MySQL** 🟢 - Database storage (development & production)
-- **Mermaid.js** 📊 - ER diagrams & database visualization
+- **JavaScript** 📊 - Dynamic frontend functionality
+- **HTML/CSS** 🎨 - User interface styling
 
-## **🪢 Part 3: Backend Development & Database Integration**
-### **1⃣ User Authentication with JWT**
-Users authenticate using **JWT tokens**, allowing secure login. The system supports **role-based access** (`is_admin` flag). **Password hashing** is implemented using **bcrypt**.
+## **🪢 Part 4: Enhanced Features & Frontend Integration**
+### **1⃣ User-Friendly Place Display**
+Places now show the **owner's name as Host** instead of just an ID. This enhances the user experience by providing more meaningful information about who owns each property.
 
-#### **📌 User Login Flow**
+#### **📌 Host & Places Relationship**
 ```mermaid
 sequenceDiagram
     participant User
+    participant Frontend
     participant API
     participant Database
 
-    User->>API: Login with email & password
-    API->>Database: Validate credentials
-    Database-->>API: Return user info
-    API-->>User: Return JWT token
+    User->>Frontend: View place details
+    Frontend->>API: Request place data
+    API->>Database: Fetch place with owner data
+    Database-->>API: Return place with owner name
+    API-->>Frontend: Display place with host name
+    Frontend-->>User: Show place with host information
 ```
 
-### **2⃣ Database Integration with SQLAlchemy**
-Switched from **in-memory storage** to **persistent database storage**. Used **SQLAlchemy ORM** for database operations. Database supports **SQLite** (development) and **MySQL** (production).
+### **2⃣ Review System with User Names**
+Reviews now display the **actual name of the reviewer** instead of just user IDs. This creates a more personal and engaging review system.
 
-#### **📌 Entity-Relationship Diagram**
-```mermaid
-erDiagram
-    User {
-        string id PK
-        string first_name
-        string last_name
-        string email
-        string password
-        boolean is_admin
-    }
+### **3⃣ Backend Improvements**
+- **Enhanced to_dict() Method**: Updated the Place model to include host information directly in the API response
+- **Optimized API Calls**: Reduced redundant API calls by including host data in place objects
+- **Consistent Data Format**: Standardized data formats across different endpoints
 
-    Place {
-        string id PK
-        string title
-        string description
-        integer number_rooms
-        integer number_bathrooms
-        integer max_guest
-        float price_by_night
-        float price
-        float latitude
-        float longitude
-        string owner_id FK
-    }
-
-    Review {
-        string id PK
-        string text
-        integer rating
-        string user_id FK
-        string place_id FK
-    }
-
-    Amenity {
-        string id PK
-        string name
-    }
-
-    Place_Amenity {
-        string place_id PK,FK
-        string amenity_id PK,FK
-    }
-
-    User ||--o{ Place : owns
-    User ||--o{ Review : writes
-    Place ||--o{ Review : has
-    Place ||--o{ Place_Amenity : has
-    Amenity ||--o{ Place_Amenity : "belongs to"
-```
-### **3⃣ API Endpoints with Role-Based Access**
-| **Endpoint**            | **Method**   | **Access**         | **Description**                             |
-|-------------------------|--------------|--------------------|---------------------------------------------|
-| `/api/v1/auth/login`    | `POST`       | Public             | User login & JWT token generation           |
-| `/api/v1/users/`        | `POST`       | Admin              | Create a new user                           |
-| `/api/v1/users/<id>`     | `PATCH`      | Admin/User         | Update user profile                         |
-| `/api/v1/places/`       | `POST`       | Authenticated Users| Create a new place                          |
-| `/api/v1/places/<id>`    | `PUT/DELETE` | Owner/Admin        | Modify or delete a place                    |
-| `/api/v1/reviews/`      | `POST`       | Authenticated Users| Submit a review                             |
-| `/api/v1/reviews/<id>`   | `PUT/DELETE` | Owner/Admin        | Modify or delete a review                   |
-
-### **4⃣ SQL Scripts for Database Setup**
-A **schema.sql** file was created to generate all tables and insert initial data.
-
-#### **📌 SQL Table Creation (Example)**
-```sql
-CREATE TABLE users (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    username VARCHAR(80) NOT NULL UNIQUE,
-    email VARCHAR(120) NOT NULL UNIQUE,
-    password_hash VARCHAR(128) NOT NULL,
-    is_admin BOOLEAN DEFAULT 0,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
-);
-```
+### **4⃣ Frontend Enhancements**
+- **Responsive Place Cards**: Updated to show host information on the main listing page
+- **Detailed Place View**: Enhanced to prominently display host information
+- **Consistent User Experience**: Applied the same naming patterns for both hosts and reviewers
 
 ## **🚀 How to Run This Project**
 ### **1⃣ Clone the Repository**
 ```sh
 git clone https://github.com/judiihh/holbertonschool-hbnb.git
-cd holbertonschool-hbnb/part3
+cd holbertonschool-hbnb/part4
 ```
 
 ### **2⃣ Set Up the Virtual Environment**
@@ -134,22 +73,18 @@ source venv/bin/activate  # On Windows: venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-### **4⃣ Initialize the Database**
+### **4⃣ Run the API**
 ```sh
-flask db init
-flask db migrate -m "Initial migration"
-flask db upgrade
+python run.py
 ```
 
-### **5⃣ Run the API**
-```sh
-flask run
-```
-
-## **💡 Future Work**
-- 🔹 **Deploy to a production environment using MySQL**
-- 🔹 **Implement Frontend for HBnB**
-- 🔹 **Optimize API performance and add caching**
+## **🏁 Project Completion**
+The HBnB project has been successfully completed, implementing all required features:
+- ✅ **Complete API with SQLAlchemy Database**
+- ✅ **JWT Authentication System**
+- ✅ **Frontend Integration with Dynamic Data**
+- ✅ **Enhanced User Experience**
+- ✅ **Host Information Display for Places**
 
 ## **👤 Author**
 - **Judith Espinal** - Holberton School Student 
