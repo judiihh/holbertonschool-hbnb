@@ -577,7 +577,6 @@ function displayPlaceDetails(place) {
     placeInfo.innerHTML = `
         <p><strong>Host:</strong> ${place.host || place.owner_name || 'Unknown'}</p>
         <p><strong>Price per night:</strong> $${place.price_by_night || place.price_per_night || 0}</p>
-        <p><strong>Location:</strong> ${place.city || ''}</p>
         <p><strong>Since:</strong> ${formatDate(place.created_at)}</p>
         <p><strong>Description:</strong> ${place.description || 'No description available'}</p>
     `;
