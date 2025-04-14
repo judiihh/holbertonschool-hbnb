@@ -275,6 +275,9 @@ function displayPlaces(places) {
             return; // Skip this place
         }
         
+        // Get host name
+        const hostName = place.host || 'Unknown Host';
+        
         console.log(`Creating place card - Name: ${name}, Price: ${price}, ID: ${id}`);
         
         const placeCard = document.createElement('div');
@@ -422,7 +425,16 @@ function loadPlaceDetails(placeId) {
         // Log available properties
         console.log('Place details properties:', Object.keys(place));
         
-        // Fetch owner details if owner_id exists
+        // Check if we already have the host name
+        if (place.host) {
+            console.log('Using existing host name:', place.host);
+            displayPlaceDetails(place);
+            loadReviews(placeId);
+            updateAddReviewButton(placeId);
+            return;
+        }
+        
+        // Fetch owner details if owner_id exists and we don't have host name yet
         if (place.owner_id || place.user_id) {
             const ownerId = place.owner_id || place.user_id;
             console.log('Fetching owner details for ID:', ownerId);
@@ -563,7 +575,7 @@ function displayPlaceDetails(place) {
     
     // Add place details
     placeInfo.innerHTML = `
-        <p><strong>Host:</strong> ${place.owner_name || 'Unknown'}</p>
+        <p><strong>Host:</strong> ${place.host || place.owner_name || 'Unknown'}</p>
         <p><strong>Price per night:</strong> $${place.price_by_night || place.price_per_night || 0}</p>
         <p><strong>Location:</strong> ${place.city || ''}</p>
         <p><strong>Since:</strong> ${formatDate(place.created_at)}</p>

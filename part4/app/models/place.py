@@ -56,4 +56,12 @@ class Place(BaseModel):
         obj_dict = super().to_dict()
         # Add amenity_ids to the dictionary
         obj_dict['amenity_ids'] = [amenity.id for amenity in self.amenities.all()]
+        
+        # Add the owner's name as 'host'
+        from app.models.user import User
+        from app import db
+        owner = db.session.query(User).filter(User.id == self.owner_id).first()
+        if owner:
+            obj_dict['host'] = f"{owner.first_name} {owner.last_name}"
+        
         return obj_dict
