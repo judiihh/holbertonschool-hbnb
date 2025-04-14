@@ -422,7 +422,47 @@ function loadPlaceDetails(placeId) {
         // Log available properties
         console.log('Place details properties:', Object.keys(place));
         
-        displayPlaceDetails(place);
+        // Fetch owner details if owner_id exists
+        if (place.owner_id || place.user_id) {
+            const ownerId = place.owner_id || place.user_id;
+            console.log('Fetching owner details for ID:', ownerId);
+            
+            fetch(`${USERS_URL}/${ownerId}`, {
+                headers: token ? { 'Authorization': `Bearer ${token}` } : {}
+            })
+            .then(response => {
+                if (!response.ok) throw new Error(`Failed to fetch owner ${ownerId}`);
+                return response.json();
+            })
+            .then(userData => {
+                console.log('Owner details:', userData);
+                
+                // Handle different API response formats
+                let owner = userData;
+                if (userData.data) owner = userData.data;
+                else if (userData.user) owner = userData.user;
+                
+                // Create owner's full name from first_name and last_name
+                if (owner.first_name && owner.last_name) {
+                    place.owner_name = `${owner.first_name} ${owner.last_name}`;
+                } else if (owner.name) {
+                    place.owner_name = owner.name;
+                } else if (owner.email) {
+                    place.owner_name = owner.email;
+                }
+                
+                displayPlaceDetails(place);
+            })
+            .catch(error => {
+                console.error('Error fetching owner details:', error);
+                // Continue displaying the place without owner details
+                displayPlaceDetails(place);
+            });
+        } else {
+            // If no owner_id, just display the place
+            displayPlaceDetails(place);
+        }
+        
         loadReviews(placeId);
         updateAddReviewButton(placeId);
     })
@@ -523,41 +563,82 @@ function displayPlaceDetails(place) {
     
     // Add place details
     placeInfo.innerHTML = `
-        <p><strong>Host:</strong> ${place.title === "Luxury Beach House" ? "John Doe" : (place.owner_name || 'Unknown')}</p>
+        <p><strong>Host:</strong> ${place.owner_name || 'Unknown'}</p>
         <p><strong>Price per night:</strong> $${place.price_by_night || place.price_per_night || 0}</p>
-        <p><strong>Location:</strong> ${place.title === "Luxury Beach House" ? "Malibu, USA" : (place.city || '')}</p>
+        <p><strong>Location:</strong> ${place.city || ''}</p>
         <p><strong>Since:</strong> ${formatDate(place.created_at)}</p>
-        <p><strong>Description:</strong> ${place.title === "Luxury Beach House" ? 
-            "Stunning beachfront property with panoramic ocean views. Enjoy direct beach access and luxury amenities." : 
-            (place.description || 'No description available')}</p>
+        <p><strong>Description:</strong> ${place.description || 'No description available'}</p>
     `;
     
     // Add amenities section
     const amenitiesSection = document.createElement('div');
     amenitiesSection.className = 'amenities';
     
-    if (place.title === "Luxury Beach House") {
-        // Hardcode amenities for Luxury Beach House
-        amenitiesSection.innerHTML = `
-            <strong>Amenities:</strong>
-            <p>WiFi, Pool, Air Conditioning</p>
-        `;
-    } else if (place.amenities && place.amenities.length > 0) {
-        amenitiesSection.innerHTML = `
-            <strong>Amenities:</strong>
-            <p>${place.amenities.join(', ')}</p>
-        `;
+    // Set initial content
+    amenitiesSection.innerHTML = `
+        <strong>Amenities:</strong>
+        <p>Loading amenities...</p>
+    `;
+    
+    placeDetails.innerHTML = '';
+    placeDetails.appendChild(placeInfo);
+    placeDetails.appendChild(amenitiesSection);
+    
+    // Check if the place has amenity_ids
+    if (place.amenity_ids && Array.isArray(place.amenity_ids) && place.amenity_ids.length > 0) {
+        console.log('Place has amenity IDs:', place.amenity_ids);
+        
+        // Fetch amenity details for each ID
+        const amenityPromises = place.amenity_ids.map(id => {
+            return fetch(`${API_URL}/amenities/${id}`, {
+                headers: getToken() ? { 'Authorization': `Bearer ${getToken()}` } : {}
+            })
+            .then(response => {
+                if (!response.ok) throw new Error(`Failed to fetch amenity ${id}`);
+                return response.json();
+            })
+            .catch(error => {
+                console.error(`Error fetching amenity ${id}:`, error);
+                return null;
+            });
+        });
+        
+        Promise.all(amenityPromises)
+            .then(amenityResponses => {
+                // Filter out failed requests and extract amenity names
+                const amenityNames = amenityResponses
+                    .filter(response => response !== null)
+                    .map(amenity => amenity.name);
+                
+                console.log('Fetched amenity names:', amenityNames);
+                
+                // Update amenities section
+                if (amenityNames.length > 0) {
+                    amenitiesSection.innerHTML = `
+                        <strong>Amenities:</strong>
+                        <p>${amenityNames.join(', ')}</p>
+                    `;
+                } else {
+                    amenitiesSection.innerHTML = `
+                        <strong>Amenities:</strong>
+                        <p>No amenities available</p>
+                    `;
+                }
+            })
+            .catch(error => {
+                console.error('Error processing amenities:', error);
+                amenitiesSection.innerHTML = `
+                    <strong>Amenities:</strong>
+                    <p>Could not load amenities</p>
+                `;
+            });
     } else {
+        console.log('Place has no amenity IDs');
         amenitiesSection.innerHTML = `
             <strong>Amenities:</strong>
             <p>No amenities listed</p>
         `;
     }
-    
-    // Clear previous content and add new content
-    placeDetails.innerHTML = '';
-    placeDetails.appendChild(placeInfo);
-    placeDetails.appendChild(amenitiesSection);
     
     // Show the add review button if user is logged in
     const addReviewButton = document.querySelector('.add-review-button');

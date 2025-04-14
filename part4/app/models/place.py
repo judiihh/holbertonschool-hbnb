@@ -50,3 +50,10 @@ class Place(BaseModel):
         self.longitude = float(kwargs.get("longitude", 0.0))
 
         # Amenities are now handled through SQLAlchemy relationship
+        
+    def to_dict(self):
+        """Overrides the BaseModel to_dict to include amenity_ids"""
+        obj_dict = super().to_dict()
+        # Add amenity_ids to the dictionary
+        obj_dict['amenity_ids'] = [amenity.id for amenity in self.amenities.all()]
+        return obj_dict

@@ -1,13 +1,16 @@
-from app.models.amenity import Amenity
-from app.models.user import User
-from app.models.place import Place
-from app.models.review import Review
 from app.persistence.repository import SQLAlchemyRepository
 import re
+from app.models.user import User
+from app.models.amenity import Amenity
+from app.models.place import Place
+from app.models.review import Review
+from app import db
 
 class HBnBFacade:
+    """Facade service that encapsulates all business logic for HBnB application."""
+
     def __init__(self):
-        """Initialize repositories for Users, Amenities, Places, and Reviews"""
+        """Initialize the facade with necessary repositories."""
         self.user_repo = SQLAlchemyRepository(User)
         self.amenity_repo = SQLAlchemyRepository(Amenity)
         self.place_repo = SQLAlchemyRepository(Place)
@@ -150,24 +153,50 @@ class HBnBFacade:
     def update_place(self, place_id, place_data):
         print(f"DEBUG: Updating place with ID: {place_id} using data: {place_data}")
         
+        # Make a copy of place_data to avoid modifying the original
+        place_data_copy = place_data.copy()
+        
         # Convert user_id to owner_id if user_id is provided (for backward compatibility)
-        if 'user_id' in place_data and 'owner_id' not in place_data:
-            place_data['owner_id'] = place_data.pop('user_id')
+        if 'user_id' in place_data_copy and 'owner_id' not in place_data_copy:
+            place_data_copy['owner_id'] = place_data_copy.pop('user_id')
             
         # Convert name to title if name is provided (for backward compatibility)
-        if 'name' in place_data and 'title' not in place_data:
-            place_data['title'] = place_data.pop('name')
+        if 'name' in place_data_copy and 'title' not in place_data_copy:
+            place_data_copy['title'] = place_data_copy.pop('name')
             
         place = self.place_repo.get(place_id)
         if not place:
             return None
-        if 'price_by_night' in place_data and place_data['price_by_night'] < 0:
+            
+        if 'price_by_night' in place_data_copy and place_data_copy['price_by_night'] < 0:
             raise ValueError("price_by_night must be positive")
-        if 'latitude' in place_data and not (-90 <= place_data['latitude'] <= 90):
+        if 'latitude' in place_data_copy and not (-90 <= place_data_copy['latitude'] <= 90):
             raise ValueError("Latitude must be between -90 and 90")
-        if 'longitude' in place_data and not (-180 <= place_data['longitude'] <= 180):
+        if 'longitude' in place_data_copy and not (-180 <= place_data_copy['longitude'] <= 180):
             raise ValueError("Longitude must be between -180 and 180")
-        self.place_repo.update(place_id, place_data)
+            
+        # Handle amenity_ids if they exist in the data
+        if 'amenity_ids' in place_data_copy:
+            amenity_ids = place_data_copy.pop('amenity_ids')
+            print(f"DEBUG: Updating amenities for place {place_id} with amenity_ids: {amenity_ids}")
+            
+            # First remove all existing place-amenity relationships
+            # Use delete to remove all entries from the junction table
+            from app.models.place import place_amenity
+            db.session.execute(place_amenity.delete().where(place_amenity.c.place_id == place_id))
+            
+            # Add new amenities
+            for amenity_id in amenity_ids:
+                amenity = self.amenity_repo.get(amenity_id)
+                if amenity:
+                    place.amenities.append(amenity)
+            
+            # Commit the changes to amenities
+            db.session.commit()
+            
+        # Update other place attributes
+        self.place_repo.update(place_id, place_data_copy)
+        
         updated_place = self.place_repo.get(place_id)
         print(f"DEBUG: Updated place: {updated_place.to_dict()}")
         return updated_place.to_dict()
